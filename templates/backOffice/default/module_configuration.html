@@ -1,0 +1,38 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="general-block-decorator">
+            <div class="row">
+                <div class="col-md-12 form-container">
+                    <div class="title">
+                        {intl l="Zen Desk configuration" d='zen.desk.bo.default'}
+                    </div>
+
+                    {form name="zen_desk_config_form"}
+                        <form method="POST" action="{url path="/admin/module/ZenDesk/configuration"}" {form_enctype} >
+
+                            {render_form_field field="success_url" value={url path='/admin/module/ZendDesk'}}
+                            {render_form_field field="error_url" value={url path='/admin/module/ZendDesk'}}
+
+                            {form_hidden_fields }
+
+                            {if $form_error}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-danger">{$form_error_message}</div>
+                                    </div>
+                                </div>
+                            {/if}
+
+                            <div class="col-md-6">
+                                {render_form_field field='api_subdomain'}
+                                {render_form_field field='api_token'}
+                                {render_form_field field='api_username'}
+                                <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="zen.desk.bo.default"}</button>
+                            </div>
+                        </form>
+                    {/form}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
