@@ -1,0 +1,40 @@
+{* Add this to your template *}
+{*
+{if $isRetailer}
+    <div class="AccountCard col-span-2">
+        <h1 class="Headline Headline--2 mb-6 font-bold text-main">
+            {intl l="My ZenDesk Tickets"}
+        </h1>
+        <div class="flex flex-col items-start AccountCard-content">
+            <table class="Table--ticket">
+                <thead>
+                <tr>
+                    <th class="text-main">{intl l="Subject"}</th>
+                    <th class="text-main">{intl l="ID"}</th>
+                    <th class="text-main">{intl l="Created At"}</th>
+                    <th class="text-main">{intl l="Update At"}</th>
+                    <th class="text-main">{intl l="Status"}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {if isset($tickets)}
+                    {foreach $tickets as $ticket}
+                        <tr>
+                            <td class="text-main">{$ticket.subject}</td>
+                            <td class="text-main">{$ticket.id}</td>
+                            <td class="text-main">{$ticket.createdAt}</td>
+                            <td class="text-main">{$ticket.updateAt}</td>
+                            <td class="text-main">{$ticket.status}</td>
+                        </tr>
+                    {/foreach}
+                {else}
+                    <tr>
+                        <td colspan="5" class="text-main">{intl l="No Tickets"}</td>
+                    </tr>
+                {/if}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{/if}
+*}
