@@ -10,6 +10,7 @@ class RetailerTicketsService
         $index = 0;
 
         foreach ($tickets["requests"] as $ticket) {
+
             $createdAt = new \DateTime($ticket->created_at);
             $updateAt = new \DateTime($ticket->updated_at);
 
