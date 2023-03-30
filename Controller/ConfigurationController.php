@@ -1,12 +1,13 @@
 <?php
 
-namespace ZendDesk\Controller;
+namespace ZenDesk\Controller;
 
 use Thelia\Controller\Admin\AdminController;
 use Symfony\Component\Routing\Annotation\Route;
+use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
-use ZendDesk\Utils\ZenDeskManager;
-use ZendDesk\ZendDesk;
+use ZenDesk\Utils\ZenDeskManager;
+use ZenDesk\ZenDesk;
 
 /**
  * @Route("/admin/module/ZenDesk", name="zendeskdelivery_config")
@@ -26,22 +27,16 @@ class ConfigurationController extends AdminController
     /**
      * @Route("/configuration", name="configuration")
      */
-    public function saveConfiguration()
+    public function saveConfiguration(ParserContext $parserContext)
     {
 
         $form = $this->createForm('zen_desk_config_form');
         try {
             $data = $this->validateForm($form)->getData();
 
-            ZendDesk::setConfigValue("zen_desk_api_subdomain", $data["api_subdomain"]);
-            ZendDesk::setConfigValue("zen_desk_api_username", $data["api_username"]);
-            ZendDesk::setConfigValue("zen_desk_api_token", $data["api_token"]);
-
-            $subdomain = $data["api_subdomain"];
-            $username = $data["api_username"];
-            $token = $data["api_token"];
-
-            $this->manager->getTicketsUser($subdomain, $username, $token, $username);
+            ZenDesk::setConfigValue("zen_desk_api_subdomain", $data["api_subdomain"]);
+            ZenDesk::setConfigValue("zen_desk_api_username", $data["api_username"]);
+            ZenDesk::setConfigValue("zen_desk_api_token", $data["api_token"]);
 
             return $this->generateSuccessRedirect($form);
         } catch (FormValidationException $e) {
@@ -52,7 +47,7 @@ class ConfigurationController extends AdminController
 
         $form->setErrorMessage($error_message);
 
-        $this->getParserContext()
+        $parserContext
             ->addForm($form)
             ->setGeneralError($error_message);
 

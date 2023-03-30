@@ -1,6 +1,6 @@
 <?php
 
-namespace ZendDesk;
+namespace ZenDesk;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
@@ -8,10 +8,10 @@ use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
 use Thelia\Module\BaseModule;
 
-class ZendDesk extends BaseModule
+class ZenDesk extends BaseModule
 {
     /** @var string */
-    const DOMAIN_NAME = 'zenddesk';
+    const DOMAIN_NAME = 'zendesk';
 
     /**
      * Defines how services are loaded in your modules

@@ -1,6 +1,6 @@
 <?php
 
-namespace ZendDesk\Utils;
+namespace ZenDesk\Utils;
 
 use Zendesk\API\HttpClient as ZendeskAPI;
 
