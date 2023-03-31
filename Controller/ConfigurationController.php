@@ -2,6 +2,9 @@
 
 namespace ZenDesk\Controller;
 
+use Exception;
+use Symfony\Component\HttpFoundation\RedirectResponse as RedirectResponse;
+use Symfony\Component\HttpFoundation\Response as Response;
 use Thelia\Controller\Admin\AdminController;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Core\Template\ParserContext;
@@ -9,25 +12,14 @@ use Thelia\Form\Exception\FormValidationException;
 use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
 
-/**
- * @Route("/admin/module/ZenDesk", name="zendeskdelivery_config")
- */
+#[Route('/admin/module/ZenDesk', name: 'zendesk_config')]
 class ConfigurationController extends AdminController
 {
-    /**
-     * @var ZenDeskManager
-     */
-    protected ZenDeskManager $manager;
-
-    public function __construct(ZenDeskManager $Manager)
-    {
-        $this->manager = $Manager;
+    public function __construct(protected ZenDeskManager $Manager) {
     }
 
-    /**
-     * @Route("/configuration", name="configuration")
-     */
-    public function saveConfiguration(ParserContext $parserContext)
+    #[Route('/configuration', name: 'configuration')]
+    public function saveConfiguration(ParserContext $parserContext) : RedirectResponse|Response
     {
 
         $form = $this->createForm('zen_desk_config_form');
@@ -41,7 +33,7 @@ class ConfigurationController extends AdminController
             return $this->generateSuccessRedirect($form);
         } catch (FormValidationException $e) {
             $error_message = $this->createStandardFormValidationErrorMessage($e);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error_message = $e->getMessage();
         }
 

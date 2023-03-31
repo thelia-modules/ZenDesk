@@ -1,0 +1,20 @@
+<div id="module-easy-datatable-manager" class="module-easy-datatable-manager">
+    {$filters nofilter}
+    <div class="row">
+        {foreach from=$template_fields|default:[] item=template}
+            {include $template}
+        {/foreach}
+    </div>
+    {if $tickets}
+        <div class="row">
+            <div class="col-md-12 filter">
+                <table class="js-list table table-striped table-bordered Table--ticket">
+                </table>
+            </div>
+        </div>
+    {else}
+        <div class="row">
+            <p>No Tickets Founds</p>
+        </div>
+    {/if}
+</div>

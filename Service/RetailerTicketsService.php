@@ -2,24 +2,27 @@
 
 namespace ZenDesk\Service;
 
+use DateTime;
+
 class RetailerTicketsService
 {
     public function formatRetailerTickets(array $tickets): array
     {
         $formatted_tickets = [];
-        $index = 0;
+        $formatted_ticket = [];
 
         foreach ($tickets["requests"] as $ticket) {
 
-            $createdAt = new \DateTime($ticket->created_at);
-            $updateAt = new \DateTime($ticket->updated_at);
+            $createdAt = new DateTime($ticket->created_at);
+            $updateAt = new DateTime($ticket->updated_at);
 
-            $formatted_tickets[$index]["subject"] = $ticket->subject;
-            $formatted_tickets[$index]["id"] = $ticket->id;
-            $formatted_tickets[$index]["createdAt"] = $createdAt->format('d/m/Y');
-            $formatted_tickets[$index]["updateAt"] = $updateAt->format('d/m/Y');
-            $formatted_tickets[$index]["status"] = $ticket->status;
-            $index += 1;
+            $formatted_ticket["subject"] = $ticket->subject;
+            $formatted_ticket["id"] = $ticket->id;
+            $formatted_ticket["createdAt"] = $createdAt->format('d/m/Y');
+            $formatted_ticket["updateAt"] = $updateAt->format('d/m/Y');
+            $formatted_ticket["status"] = $ticket->status;
+
+            $formatted_tickets[] = $formatted_ticket;
         }
 
         return $formatted_tickets;
