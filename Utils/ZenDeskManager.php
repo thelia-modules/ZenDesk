@@ -3,19 +3,22 @@
 namespace ZenDesk\Utils;
 
 use Zendesk\API\HttpClient as ZendeskAPI;
+use ZenDesk\ZenDesk;
 
 class ZenDeskManager
 {
     public function getTicketsUser(
-        string $subdomain,
-        string $username,
-        string $token,
         string $user,
         int    $page = -1,
         int    $perPage = -1): ?array
     {
-        $client = new ZendeskAPI($subdomain);
-        $client->setAuth('basic', ['username' => $username, 'token' => $token]);
+        $client = new ZendeskAPI(ZenDesk::getConfigValue("zen_desk_api_subdomain"));
+        $client->setAuth('basic',
+            [
+                'username' => ZenDesk::getConfigValue("zen_desk_api_username"),
+                'token' => ZenDesk::getConfigValue("zen_desk_api_token")
+            ]
+        );
 
         // Get the customer
         $stdCustomer = $client->users()->search(array("query" => $user));

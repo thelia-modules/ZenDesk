@@ -3,6 +3,9 @@
 namespace ZenDesk\Service;
 
 use DateTime;
+use Thelia\Core\Translation\Translator;
+use ZenDesk\Utils\ZenDeskManager;
+use ZenDesk\ZenDesk;
 
 class RetailerTicketsService
 {
@@ -20,11 +23,34 @@ class RetailerTicketsService
             $formatted_ticket["id"] = $ticket->id;
             $formatted_ticket["createdAt"] = $createdAt->format('d/m/Y');
             $formatted_ticket["updateAt"] = $updateAt->format('d/m/Y');
-            $formatted_ticket["status"] = $ticket->status;
+
+            if ($ticket->status === "new"){
+                $formatted_ticket["status"] = Translator::getInstance()->trans('new', [], ZenDesk::DOMAIN_NAME);
+            }
+            if ($ticket->status === "open"){
+                $formatted_ticket["status"] = Translator::getInstance()->trans('open', [], ZenDesk::DOMAIN_NAME);
+            }
+            if ($ticket->status === "pending"){
+                $formatted_ticket["status"] = Translator::getInstance()->trans('pending', [], ZenDesk::DOMAIN_NAME);
+            }
+            if ($ticket->status === "solved"){
+                $formatted_ticket["status"] = Translator::getInstance()->trans('solved', [], ZenDesk::DOMAIN_NAME);
+            }
 
             $formatted_tickets[] = $formatted_ticket;
         }
 
         return $formatted_tickets;
+    }
+
+    public function getFormattedTicketsUser(ZenDeskManager $manager, string $user): ?array
+    {
+        $tickets = $manager->getTicketsUser($user);
+
+        if ($tickets !== null){
+            return $this->formatRetailerTickets($tickets);
+        }
+
+        return null;
     }
 }

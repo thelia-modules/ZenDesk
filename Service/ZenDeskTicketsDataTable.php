@@ -37,9 +37,6 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     public function hasTickets(): bool
     {
         return 0 < $this->manager->getTicketsUser(
-                ZenDesk::getConfigValue("zen_desk_api_subdomain"),
-                ZenDesk::getConfigValue("zen_desk_api_username"),
-                ZenDesk::getConfigValue("zen_desk_api_token"),
                 $this->securityContext->getCustomerUser()->getEmail(),
             );
     }
@@ -49,9 +46,6 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         $zenDeskUrl = "https://" . ZenDesk::getConfigValue("zen_desk_api_subdomain") . ".zendesk.com/agent/tickets/";
 
         $tickets = $this->manager->getTicketsUser(
-            ZenDesk::getConfigValue("zen_desk_api_subdomain"),
-            ZenDesk::getConfigValue("zen_desk_api_username"),
-            ZenDesk::getConfigValue("zen_desk_api_token"),
             $this->securityContext->getCustomerUser()->getEmail(),
         );
 
@@ -69,11 +63,11 @@ class ZenDeskTicketsDataTable extends BaseDataTable
 
             foreach ($formatedTickets as $formatedTicket) {
                 $json['data'][] = [
+                    $formatedTicket["id"],
                     [
                         'name' => $formatedTicket["subject"],
                         'href' => $zenDeskUrl . $formatedTicket["id"],
                     ],
-                    $formatedTicket["id"],
                     $formatedTicket["createdAt"],
                     $formatedTicket["updateAt"],
                     $formatedTicket["status"],
@@ -100,17 +94,17 @@ class ZenDeskTicketsDataTable extends BaseDataTable
 
         $definitions = [
             [
+                'name' => 'id',
+                'targets' => ++$i,
+                'className' => "text-center",
+                'title' => Translator::getInstance()->trans('ID', [], ZenDesk::DOMAIN_NAME),
+            ],
+            [
                 'name' => 'subject',
                 'targets' => ++$i,
                 'className' => "text-center",
                 'render' => "renderRefFunction",
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
-            ],
-            [
-                'name' => 'id',
-                'targets' => ++$i,
-                'className' => "text-center",
-                'title' => Translator::getInstance()->trans('ID', [], ZenDesk::DOMAIN_NAME),
             ],
             [
                 'name' => 'created_at',
