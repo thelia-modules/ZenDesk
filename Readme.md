@@ -35,3 +35,9 @@ Go to the configuration panel and add your subdomain, api token and Zendesk's us
 When Connected, your retailers will see their tickets from ZenDesk.
 
 It's using the email of the retailer so be sure to add it in ZenDesk.
+
+## Loop
+
+[zendesk_users_loop]
+
+![ZenDeskUser](docs/images/zendesk_users_list.png)

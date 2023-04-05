@@ -9,4 +9,8 @@
             <tag name="hook.event_listener" event="front.easydatatablemanager.js" type="front" method="renderDataTableTools" />
         </hook>
     </hooks>
+
+    <loops>
+        <loop class="zendesk_users_loop" name="ZenDesk/Loop/ZendeskUsersLoop"/>
+    </loops>
 </config>

@@ -1,36 +1,93 @@
+{if isset($smarty.get.tab)}
+    {$tab=$smarty.get.tab}
+{else}
+    {$tab='users'}
+{/if}
+<style>
+    input[type=number]
+    {
+        min-width:100px;
+    }
+</style>
+
 <div class="row">
     <div class="col-md-12">
         <div class="general-block-decorator">
             <div class="row">
-                <div class="col-md-12 form-container">
-                    <div class="title">
-                        {intl l="Zen Desk configuration" d='zen.desk.bo.default'}
-                    </div>
+                <div class="col-md-12">
+                    <ul id="tabbed-menu" class="nav nav-tabs">
+                        <li class="{if $tab eq "config"}active{/if}"><a data-toggle="tab" href="#config">{intl l="Configuration" d='zen.desk.bo.default'}</a> </li>
+                        <li class="{if $tab eq "users"}active{/if}"><a data-toggle="tab" href="#users">{intl l="List Zendesk Users" d='zen.desk.bo.default'}</a> </li>
+                    </ul>
 
-                    {form name="zen_desk_config_form"}
-                        <form method="POST" action="{url path="/admin/module/ZenDesk/configuration"}" {form_enctype} >
+                    <div class="tab-content">
+                        <div id="config" class="tab-pane {if $tab eq "config"}active{/if} form-container">
+                            <br>
 
-                            {render_form_field field="success_url" value={url path='/admin/module/ZenDesk'}}
-                            {render_form_field field="error_url" value={url path='/admin/module/ZenDesk'}}
+                        <div class="title">
+                            {intl l="Zen Desk configuration" d='zen.desk.bo.default'}
+                        </div>
 
-                            {form_hidden_fields }
+                        {form name="zendesk_form_configuration_form"}
+                            <form method="POST" action="{url path="/admin/module/ZenDesk/configuration"}" {form_enctype} >
 
-                            {if $form_error}
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="alert alert-danger">{$form_error_message}</div>
+                                {render_form_field field="success_url" value={url path='/admin/module/ZenDesk'}}
+                                {render_form_field field="error_url" value={url path='/admin/module/ZenDesk'}}
+
+                                {form_hidden_fields }
+
+                                {if $form_error}
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="alert alert-danger">{$form_error_message}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            {/if}
+                                {/if}
 
-                            <div class="col-md-6">
-                                {render_form_field field='api_subdomain'}
-                                {render_form_field field='api_token'}
-                                {render_form_field field='api_username'}
-                                <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="zen.desk.bo.default"}</button>
+                                <div class="col-md-6">
+                                    {render_form_field field='api_subdomain'}
+                                    {render_form_field field='api_token'}
+                                    {render_form_field field='api_username'}
+                                    <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="zen.desk.bo.default"}</button>
+                                </div>
+                            </form>
+                        {/form}
+                        </div>
+
+                        <div id="users" class="tab-pane {if $tab eq "users"}active{/if} form-container">
+                            <br>
+
+                            <div class="title">
+                                {intl l="Zen Desk Users" d='zen.desk.bo.default'}
                             </div>
-                        </form>
-                    {/form}
+
+                            <table class="table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>{intl l='Name' d='zen.desk.bo.default'}</th>
+                                    <th>{intl l='Email' d='zen.desk.bo.default'}</th>
+                                    <th>{intl l='Role' d='zen.desk.bo.default'}</th>
+                                    <th>{intl l='Locale' d='zen.desk.bo.default'}</th>
+                                    <th>{intl l='Created_At' d='zen.desk.bo.default'}</th>
+                                    <th>{intl l='Update_At' d='zen.desk.bo.default'}</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                {loop type="zendesk_users_loop" name="zendesk_user"}
+                                    <tr>
+                                        <td>{$NAME}</td>
+                                        <td>{$EMAIL}</td>
+                                        <td>{$ROLE}</td>
+                                        <td>{$LOCALE}</td>
+                                        <td>{$CREATED_AT}</td>
+                                        <td>{$UPDATE_AT}</td>
+                                    </tr>
+                                {/loop}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

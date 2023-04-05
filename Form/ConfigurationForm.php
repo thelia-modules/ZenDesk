@@ -49,9 +49,4 @@ class ConfigurationForm extends BaseForm
                 ]
             );
     }
-
-    public static function getName()
-    {
-        return 'zen_desk_config_form';
-    }
 }

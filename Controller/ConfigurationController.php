@@ -9,20 +9,21 @@ use Thelia\Controller\Admin\AdminController;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
+use ZenDesk\Form\ConfigurationForm;
 use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
 
 #[Route('/admin/module/ZenDesk', name: 'zendesk_config')]
 class ConfigurationController extends AdminController
 {
-    public function __construct(protected ZenDeskManager $Manager) {
+    public function __construct(protected ZenDeskManager $manager) {
     }
 
     #[Route('/configuration', name: 'configuration')]
     public function saveConfiguration(ParserContext $parserContext) : RedirectResponse|Response
     {
 
-        $form = $this->createForm('zen_desk_config_form');
+        $form = $this->createForm(ConfigurationForm::getName());
         try {
             $data = $this->validateForm($form)->getData();
 

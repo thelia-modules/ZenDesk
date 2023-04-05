@@ -12,13 +12,7 @@ class ZenDeskManager
         int    $page = -1,
         int    $perPage = -1): ?array
     {
-        $client = new ZendeskAPI(ZenDesk::getConfigValue("zen_desk_api_subdomain"));
-        $client->setAuth('basic',
-            [
-                'username' => ZenDesk::getConfigValue("zen_desk_api_username"),
-                'token' => ZenDesk::getConfigValue("zen_desk_api_token")
-            ]
-        );
+        $client = $this->authZendeskAdmin();
 
         // Get the customer
         $stdCustomer = $client->users()->search(array("query" => $user));
@@ -39,5 +33,25 @@ class ZenDeskManager
             return get_object_vars($tickets);
         }
         return null;
+    }
+
+    public function getAllUsers()
+    {
+        $client = $this->authZendeskAdmin();
+
+        return $client->users()->findAll()->users;
+    }
+
+    private function authZendeskAdmin(): ZendeskAPI
+    {
+        $client = new ZendeskAPI(ZenDesk::getConfigValue("zen_desk_api_subdomain"));
+        $client->setAuth('basic',
+            [
+                'username' => ZenDesk::getConfigValue("zen_desk_api_username"),
+                'token' => ZenDesk::getConfigValue("zen_desk_api_token")
+            ]
+        );
+
+        return $client;
     }
 }
