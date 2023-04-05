@@ -6,6 +6,7 @@ use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
+use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use ZenDesk\Utils\ZenDeskManager;
 
@@ -35,33 +36,32 @@ class ZendeskUsersLoop extends BaseLoop implements ArraySearchLoopInterface
     {
         $items = [];
 
-//$search = CustomerQuery::create();
-
-//$search->joinProcityCustomerFamily()->filterById(1)->find();
-
         $manager = new ZenDeskManager();
         $zendeskUsers = $manager->getAllUsers();
 
         foreach ($zendeskUsers as $user)
         {
-            $tmpItems = [];
-            $tmpItems[] = $user->name;
-            $tmpItems[] = $user->email;
-            $tmpItems[] = $user->role;
-            $tmpItems[] = $user->created_at;
-            $tmpItems[] = $user->updated_at;
-            $tmpItems[] = $user->locale;
+            if ($this->getEmail() === $user->email)
+            {
+                $tmpItems = [];
+                $tmpItems[] = $user->name;
+                $tmpItems[] = $user->email;
+                $tmpItems[] = $user->role;
+                $tmpItems[] = $user->created_at;
+                $tmpItems[] = $user->updated_at;
+                $tmpItems[] = $user->locale;
 
-            $items[] = $tmpItems;
+                $items[] = $tmpItems;
+            }
         }
 
         return $items;
-
     }
 
     protected function getArgDefinitions()
     {
         return new ArgumentCollection(
+            Argument::createAnyTypeArgument("email")
         );
     }
 }

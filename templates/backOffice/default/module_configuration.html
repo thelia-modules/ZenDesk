@@ -64,6 +64,7 @@
                             <table class="table table-condensed table-striped">
                                 <thead>
                                 <tr>
+                                    <th>{intl l='Id' d='zen.desk.bo.default'}</th>
                                     <th>{intl l='Name' d='zen.desk.bo.default'}</th>
                                     <th>{intl l='Email' d='zen.desk.bo.default'}</th>
                                     <th>{intl l='Role' d='zen.desk.bo.default'}</th>
@@ -74,8 +75,10 @@
                                 </thead>
 
                                 <tbody>
-                                {loop type="zendesk_users_loop" name="zendesk_user"}
+                                {loop type="zendesk_customers_loop" name="zendesk_customers"}
+                                {loop type="zendesk_users_loop" name="zendesk_user" email=$EMAIL}
                                     <tr>
+                                        <td><a href="/admin/customer/update?customer_id={$ID}">{$ID}</td>
                                         <td>{$NAME}</td>
                                         <td>{$EMAIL}</td>
                                         <td>{$ROLE}</td>
@@ -83,6 +86,7 @@
                                         <td>{$CREATED_AT}</td>
                                         <td>{$UPDATE_AT}</td>
                                     </tr>
+                                {/loop}
                                 {/loop}
                                 </tbody>
                             </table>
