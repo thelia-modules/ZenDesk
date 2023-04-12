@@ -1,10 +1,10 @@
 <!-- Show Tickets information in modal-->
 {if $ticketId}
-    <div class="pb-3 text-center Modal-title">{intl l="Ticket n°" d='zendesk.bo.default' } {$ticketId}</div>
+    <div class="pb-3 text-center Modal-title">{intl l="Ticket n°" d='zendesk.fo.default'} {$ticketId}</div>
 {/if}
 <div>
     {foreach from=$comments item=comment key=k}
-        <h2>{intl l="comment " d='zendesk.bo.default'}{$k+1}</h2>
+        <h2>{intl l="comment" d='zendesk.fo.default'} {$k+1}</h2>
         <div class="text-main m-2 border-2 border-main">{$comment nofilter}</div>
     {/foreach}
 </div>

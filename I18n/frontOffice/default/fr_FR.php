@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'My ZenDesk Tickets' => 'Mes Tickets ZenDesk',
+    'Open Ticket comments' => 'Ouvrir les commentaires',
     'Ticket n°' => 'Ticket n°',
-    'comment ' => 'commentaire ',
+    'comment' => 'commentaire',
 );

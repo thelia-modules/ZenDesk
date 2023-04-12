@@ -16,8 +16,8 @@
             <div class="row">
                 <div class="col-md-12">
                     <ul id="tabbed-menu" class="nav nav-tabs">
-                        <li class="{if $tab eq "config"}active{/if}"><a data-toggle="tab" href="#config">{intl l="Configuration" d='zen.desk.bo.default'}</a> </li>
-                        <li class="{if $tab eq "users"}active{/if}"><a data-toggle="tab" href="#users">{intl l="List Zendesk Users" d='zen.desk.bo.default'}</a> </li>
+                        <li class="{if $tab eq "config"}active{/if}"><a data-toggle="tab" href="#config">{intl l="Configuration" d='zendesk.bo.default'}</a> </li>
+                        <li class="{if $tab eq "users"}active{/if}"><a data-toggle="tab" href="#users">{intl l="List Zendesk Users" d='zendesk.bo.default'}</a> </li>
                     </ul>
 
                     <div class="tab-content">
@@ -25,7 +25,7 @@
                             <br>
 
                         <div class="title">
-                            {intl l="Zen Desk configuration" d='zen.desk.bo.default'}
+                            {intl l="Zen Desk configuration" d='zendesk.bo.default'}
                         </div>
 
                         {form name="zendesk_form_configuration_form"}
@@ -48,7 +48,7 @@
                                     {render_form_field field='api_subdomain'}
                                     {render_form_field field='api_token'}
                                     {render_form_field field='api_username'}
-                                    <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="zen.desk.bo.default"}</button>
+                                    <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="zendesk.bo.default"}</button>
                                 </div>
                             </form>
                         {/form}
@@ -58,19 +58,19 @@
                             <br>
 
                             <div class="title">
-                                {intl l="Zen Desk Users" d='zen.desk.bo.default'}
+                                {intl l="Zen Desk Users" d='zendesk.bo.default'}
                             </div>
 
                             <table class="table table-condensed table-striped">
                                 <thead>
                                 <tr>
-                                    <th>{intl l='Id' d='zen.desk.bo.default'}</th>
-                                    <th>{intl l='Name' d='zen.desk.bo.default'}</th>
-                                    <th>{intl l='Email' d='zen.desk.bo.default'}</th>
-                                    <th>{intl l='Role' d='zen.desk.bo.default'}</th>
-                                    <th>{intl l='Locale' d='zen.desk.bo.default'}</th>
-                                    <th>{intl l='Created_At' d='zen.desk.bo.default'}</th>
-                                    <th>{intl l='Update_At' d='zen.desk.bo.default'}</th>
+                                    <th>{intl l='Id' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Name' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Email' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Role' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Locale' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Created_At' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Update_At' d='zendesk.bo.default'}</th>
                                 </tr>
                                 </thead>
 

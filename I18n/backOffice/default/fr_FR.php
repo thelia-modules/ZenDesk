@@ -3,9 +3,11 @@
 return array(
     'Configuration' => 'Configuration',
     'Created_At' => 'Date de Création',
+    'Email' => 'Email',
     'Id' => 'Id',
     'List Zendesk Users' => 'Liste des Utilisateurs de Zendesk',
     'Locale' => 'Locale',
+    'Name' => 'Nom',
     'Role' => 'Rôle',
     'Save Configuration' => 'Enregistrer la configuration',
     'Update_At' => 'Date de Modification',
