@@ -71,6 +71,9 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                     $formatedTicket["createdAt"],
                     $formatedTicket["updateAt"],
                     $formatedTicket["status"],
+                    [
+                        'id' => $formatedTicket["id"],
+                    ],
                 ];
             }
         }
@@ -123,6 +126,13 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'targets' => ++$i,
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Status', [], ZenDesk::DOMAIN_NAME),
+            ],
+            [
+                'name' => 'comments',
+                'targets' => ++$i,
+                'className' => "text-center",
+                'render' => "renderCommentsFunction",
+                'title' => Translator::getInstance()->trans('Actions', [], ZenDesk::DOMAIN_NAME),
             ],
         ];
 

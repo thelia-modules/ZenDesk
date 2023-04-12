@@ -1,6 +1,7 @@
 <?php
 
 return array(
+    'Actions' => 'Actions',
     'Admin Zendesk username' => 'Nom d\'utilisateur administateur ZenDesk',
     'Created At' => 'Date de Création',
     'Go to zendesk admin panel, Search API Zendesk -> Add a token API' => 'Aller sur le panneau administrateur, Rechercher API Zendesk -> Ajouter un token API',

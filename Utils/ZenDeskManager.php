@@ -54,4 +54,11 @@ class ZenDeskManager
 
         return $client;
     }
+
+    public function getCommentTicket(int $id): array
+    {
+        $client = $this->authZendeskAdmin();
+
+        return get_object_vars($client->tickets($id)->comments()->findAll());
+    }
 }
