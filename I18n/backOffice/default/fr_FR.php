@@ -5,7 +5,7 @@ return array(
     'Created_At' => 'Date de Création',
     'Email' => 'Email',
     'Id' => 'Id',
-    'List Zendesk Users' => 'Liste des Utilisateurs de Zendesk',
+    'List Zendesk Users' => 'Liste des utilisateurs de Zendesk',
     'Locale' => 'Locale',
     'Name' => 'Nom',
     'Role' => 'Rôle',
