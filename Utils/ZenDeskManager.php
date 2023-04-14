@@ -61,4 +61,11 @@ class ZenDeskManager
 
         return get_object_vars($client->tickets($id)->comments()->findAll());
     }
+
+    public function getCommentAuthor($author_id): array
+    {
+        $client = $this->authZendeskAdmin();
+
+        return get_object_vars($client->users()->find($author_id));
+    }
 }

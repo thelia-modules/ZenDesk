@@ -15,9 +15,15 @@ class FrontController extends BaseFrontController
         $comments = $manager->getCommentTicket($id);
 
         $formattedComment = [];
+        $tmp = [];
 
         foreach ($comments["comments"] as $comment){
-            $formattedComment[] = $comment->html_body;
+            $tmp["author_name"] = $manager->getCommentAuthor($comment->author_id)["user"]->name;
+            $tmp["author_email"] = $manager->getCommentAuthor($comment->author_id)["user"]->email;
+            $tmp["created_at"] = date('d F Y à H\hi', strtotime($comment->created_at));
+            $tmp["body"] = $comment->html_body;
+
+            $formattedComment[] = $tmp;
         }
 
         return $this->render("comments", [

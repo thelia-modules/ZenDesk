@@ -2,6 +2,7 @@
 
 namespace ZenDesk\Loop;
 
+use IntlDateFormatter;
 use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
@@ -47,8 +48,8 @@ class ZendeskUsersLoop extends BaseLoop implements ArraySearchLoopInterface
                 $tmpItems[] = $user->name;
                 $tmpItems[] = $user->email;
                 $tmpItems[] = $user->role;
-                $tmpItems[] = $user->created_at;
-                $tmpItems[] = $user->updated_at;
+                $tmpItems[] = $this->getFormatDate(strtotime($user->created_at), $this->getLocale());
+                $tmpItems[] = $this->getFormatDate(strtotime($user->updated_at), $this->getLocale());
                 $tmpItems[] = $user->locale;
 
                 $items[] = $tmpItems;
@@ -58,10 +59,24 @@ class ZendeskUsersLoop extends BaseLoop implements ArraySearchLoopInterface
         return $items;
     }
 
+    private function getFormatDate($datetime, $locale): bool|string
+    {
+        $fmt = new IntlDateFormatter(
+            $locale,
+            IntlDateFormatter::NONE,
+            IntlDateFormatter::NONE
+        );
+
+        $fmt->setPattern('dd MMMM YYYY à H:mm');
+
+        return $fmt->format($datetime);
+    }
+
     protected function getArgDefinitions()
     {
         return new ArgumentCollection(
-            Argument::createAnyTypeArgument("email")
+            Argument::createAnyTypeArgument("email"),
+            Argument::createAnyTypeArgument("locale")
         );
     }
 }

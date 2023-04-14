@@ -5,6 +5,10 @@
 <div>
     {foreach from=$comments item=comment key=k}
         <h2>{intl l="comment" d='zendesk.fo.default'} {$k+1}</h2>
-        <div class="text-main m-2 border-2 border-main">{$comment nofilter}</div>
+        <div>
+            <div>{intl l="from" d='zendesk.fo.default'} {$comment.author_name} - {$comment.author_email}</div>
+            <div>{intl l="at" d='zendesk.fo.default'} {$comment.created_at}</div>
+        </div>
+        <div class="text-main m-2 border-2 border-main">{$comment.body nofilter}</div>
     {/foreach}
 </div>
