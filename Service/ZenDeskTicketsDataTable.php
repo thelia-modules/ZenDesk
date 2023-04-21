@@ -64,10 +64,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             foreach ($formatedTickets as $formatedTicket) {
                 $json['data'][] = [
                     $formatedTicket["id"],
-                    [
-                        'name' => $formatedTicket["subject"],
-                        'href' => $zenDeskUrl . $formatedTicket["id"],
-                    ],
+                    $formatedTicket["subject"],
                     $formatedTicket["createdAt"],
                     $formatedTicket["updateAt"],
                     $formatedTicket["status"],
@@ -106,7 +103,6 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'name' => 'subject',
                 'targets' => ++$i,
                 'className' => "text-center",
-                'render' => "renderRefFunction",
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
             ],
             [
