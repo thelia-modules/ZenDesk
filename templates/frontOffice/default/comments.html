@@ -2,23 +2,43 @@
     {include file="css/comments.css.html"}
 {/block}
 
-<head>
-    <base target="_blank">
-</head>
-
 <!-- Show Tickets information in modal-->
 <div id="Modal-infos" class="Modal_infos">
     {if $ticketId}
-        <div class="pb-3 text-center Modal-title">{intl l="Ticket n°" d='zendesk.fo.default'} {$ticketId}</div>
+        <div class="Headline Headline--2 mb-6 font-bold text-main text-center">#{$ticketId} - {$ticketName}</div>
     {/if}
     <div>
+        <a class="Button Button--primary mb-4" href="#{count($comments)}">{intl l="show last message" d='zendesk.fo.default'}</a>
+    </div>
+    <div>
         {foreach from=$comments item=comment key=k}
-            <p class="comment">{intl l="comment" d='zendesk.fo.default'} {$k+1}</p>
-            <div>
-                <div class="comment-info">{intl l="from" d='zendesk.fo.default'} {$comment.author_name} - {$comment.author_email}</div>
-                <div class="comment-info">{intl l="at" d='zendesk.fo.default'} {$comment.created_at}</div>
+            <p class="comment-title">{intl l="comment" d='zendesk.fo.default'} {$k+1}</p>
+            <div id={$k+1}>
+                <div class="comment">
+                    <div class="comment-author-picture">
+                        <img class="img-rounded" src="{$comment.author_picture_url}" alt="author-picture">
+                    </div>
+                    <div class="comment-info">
+                        <strong class="text-main comment-author-name">{$comment.author_name}</strong>
+                        - {$comment.created_at_str}
+                        <span class="comment-date"> - {$comment.created_at}</span>
+                    </div>
+                    <div class="comment-author-email">
+                        {$comment.author_email}
+                    </div>
+                </div>
             </div>
-            <div class="text-main m-2 border-2 border-main p-4">{$comment.body nofilter}</div>
+            <div id="Modal-comment" class="text-main m-2 border-2 border-main p-4">
+                {$comment.body nofilter}
+
+                {if isset($comment.attachments)}
+                    <div class="text-gray">
+                        {foreach from=$comment.attachments item=attachment}
+                            <a href="{$attachment.content_url}" target="_blank">{$attachment.file_name}</a>
+                        {/foreach}
+                    </div>
+                {/if}
+            </div>
         {/foreach}
     </div>
 </div>
