@@ -2,11 +2,20 @@
 
 namespace ZenDesk\Utils;
 
+use Zendesk\API\HttpClient;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use ZenDesk\ZenDesk;
 
 class ZenDeskManager
 {
+    public function getUserByEmail(string $mail, HttpClient $client = null): ?\stdClass
+    {
+        if ($client === null){
+            $client = $this->authZendeskAdmin();
+        }
+
+        return  $client->users()->search(array("query" => $mail));
+    }
     public function getTicketsUser(
         string $user,
         int    $page = -1,
@@ -14,8 +23,7 @@ class ZenDeskManager
     {
         $client = $this->authZendeskAdmin();
 
-        // Get the customer
-        $stdCustomer = $client->users()->search(array("query" => $user));
+        $stdCustomer = $this->getUserByEmail($user, $client);
 
         if ($stdCustomer->users != null) {
             $customerId = $stdCustomer->users[0]->id;
@@ -74,5 +82,26 @@ class ZenDeskManager
         $client = $this->authZendeskAdmin();
 
         return get_object_vars($client->tickets($id)->find());
+    }
+
+    public function createTicket(array $params): void
+    {
+        $client = $this->authZendeskAdmin();
+
+        $client->tickets()->create($params);
+    }
+
+    public function getAllGroup()
+    {
+        $client = $this->authZendeskAdmin();
+
+        return $client->groups()->findAll()->groups;
+    }
+
+    public function getAllOrganization()
+    {
+        $client = $this->authZendeskAdmin();
+
+        return $client->organizations()->findAll()->organizations;
     }
 }

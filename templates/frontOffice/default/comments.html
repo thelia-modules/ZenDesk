@@ -7,28 +7,31 @@
     {if $ticketId}
         <div class="Headline Headline--2 mb-6 font-bold text-main text-center">#{$ticketId} - {$ticketName}</div>
     {/if}
-    <div>
-        <a class="Button Button--primary mb-4" href="#{count($comments)}">{intl l="show last message" d='zendesk.fo.default'}</a>
+    <div class="text-center">
+        <a class="Button Button--primary" href="#{count($comments)}">{intl l="show last message" d='zendesk.fo.default'}</a>
     </div>
     <div>
         {foreach from=$comments item=comment key=k}
-            <p class="comment-title">{intl l="comment" d='zendesk.fo.default'} {$k+1}</p>
-            <div id={$k+1}>
+            <div id="{$k+1}" class="mt-6">
                 <div class="comment">
                     <div class="comment-author-picture">
+                        {if $comment.author_picture_url}
                         <img class="img-rounded" src="{$comment.author_picture_url}" alt="author-picture">
+                        {else}
+                            <img class="img-rounded" src="#" alt="default-author-picture">
+                        {/if}
                     </div>
                     <div class="comment-info">
                         <strong class="text-main comment-author-name">{$comment.author_name}</strong>
                         - {$comment.created_at_str}
-                        <span class="comment-date"> - {$comment.created_at}</span>
+                        <span> - {$comment.created_at}</span>
                     </div>
                     <div class="comment-author-email">
                         {$comment.author_email}
                     </div>
                 </div>
             </div>
-            <div id="Modal-comment" class="text-main m-2 border-2 border-main p-4">
+            <div id="Modal-comment" class="text-main m-2 border border-main p-4">
                 {$comment.body nofilter}
 
                 {if isset($comment.attachments)}
@@ -40,5 +43,8 @@
                 {/if}
             </div>
         {/foreach}
+    </div>
+    <div class="text-center">
+        <a class="Button Button--primary" href="#Modal-infos">{intl l="back to top" d='zendesk.fo.default'}</a>
     </div>
 </div>

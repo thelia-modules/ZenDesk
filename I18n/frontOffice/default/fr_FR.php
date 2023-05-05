@@ -2,6 +2,6 @@
 
 return array(
     'Open Ticket comments' => 'Ouvrir les commentaires',
-    'comment' => 'commentaire',
-    'show last message' => 'allez au dernier message',
+    'back to top' => 'aller en haut',
+    'show last message' => 'aller au dernier message',
 );

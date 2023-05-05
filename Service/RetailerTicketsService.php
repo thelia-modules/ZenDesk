@@ -53,4 +53,17 @@ class RetailerTicketsService
 
         return null;
     }
+
+    public function getOrganizationId(ZenDeskManager $manager, string $organization) :?int
+    {
+        $organizations = $manager->getAllOrganization();
+
+        foreach ($organizations as $orga){
+            if ($orga->name === $organization){
+                return $orga->id;
+            }
+        }
+
+        return null;
+    }
 }
