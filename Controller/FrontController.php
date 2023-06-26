@@ -139,17 +139,35 @@ class FrontController extends BaseFrontController
 
             $requester = $manager->getUserByEmail($securityContext->getCustomerUser()->getEmail());
 
+            $uploads = [];
+
+            if ($data["attachements"])
+            {
+                foreach ($data["attachements"] as $attachement)
+                {
+                    $upload = [
+                        "file" => $attachement->getpathname(),
+                        "type" => $attachement->getClientMimeType(),
+                        "name" => $attachement->getClientOriginalName()
+                    ];
+
+                    $attachment = $manager->uploadFile($upload);
+
+                    $uploads[] = $attachment->upload->token;
+                }
+            }
+
             $params = [
                 "comment" => [
                     "body" => $data["comment_reply"],
-                    "author_id" => $requester->users[0]->id
+                    "author_id" => $requester->users[0]->id,
+                    'uploads'   => $uploads
                 ]
             ];
 
             $manager->createComment($params, $id);
 
             return $this->generateSuccessRedirect($form);
-
         } catch (\Exception $e) {
             $error_message = $e->getMessage();
         }

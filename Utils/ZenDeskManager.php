@@ -98,6 +98,13 @@ class ZenDeskManager
         $client->tickets()->update($id, $params);
     }
 
+    public function uploadFile(array $upload): ?\stdClass
+    {
+        $client = $this->authZendeskAdmin();
+
+        return $client->attachments()->upload($upload);
+    }
+
     public function getAllGroup()
     {
         $client = $this->authZendeskAdmin();

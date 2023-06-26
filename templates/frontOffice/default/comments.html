@@ -69,6 +69,13 @@
                 </label>
             {/form_field}
 
+            {form_field form=$form field="attachements"}
+                <label>
+                    <div class="text-main font-bold text-sm">{intl l="{$label}"} : </div>
+                <input type="file" class="Input-field" name="{$name}" value="{$value}" {$attr} />
+                </label>
+            {/form_field}
+
             <div class="text-center">
                 <button type="submit" class="Button Button--primary m-2">{intl l="Reply" d='zendesk.fo.default'}</button>
             </div>
