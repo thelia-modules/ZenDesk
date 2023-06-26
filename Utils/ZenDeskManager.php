@@ -91,6 +91,13 @@ class ZenDeskManager
         $client->tickets()->create($params);
     }
 
+    public function createComment(array $params, $id = null): void
+    {
+        $client = $this->authZendeskAdmin();
+
+        $client->tickets()->update($id, $params);
+    }
+
     public function getAllGroup()
     {
         $client = $this->authZendeskAdmin();

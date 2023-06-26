@@ -10,6 +10,7 @@ use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
+use ZenDesk\Form\ZenDeskTicketCommentsForm;
 use ZenDesk\Form\ZenDeskTicketForm;
 use ZenDesk\Service\RetailerTicketsService;
 use ZenDesk\Utils\ZenDeskManager;
@@ -88,7 +89,7 @@ class FrontController extends BaseFrontController
         return $this->generateErrorRedirect($form);
     }
 
-    #[Route('/tickets/{id}/comments', name: 'tickets_comments')]
+    #[Route('/tickets/{id}/comments', name: 'tickets_comments_get', methods: 'GET')]
     public function getCommentsByTicketsId(RequestStack $requestStack, ZenDeskManager $manager, $id): Response
     {
         $locale = $requestStack->getCurrentRequest()->getSession()->getLang()->getLocale();
@@ -122,6 +123,43 @@ class FrontController extends BaseFrontController
             "ticketId" => $id,
             "ticketName" => $ticketName
          ]);
+    }
+
+    #[Route('/tickets/{id}/comments', name: 'tickets_comments_post', methods: 'POST')]
+    public function createNewCommentTicket(
+        SecurityContext $securityContext,
+        ZenDeskManager $manager,
+        ParserContext $parserContext,
+        $id
+    ) {
+        $form = $this->createForm(ZenDeskTicketCommentsForm::getName());
+
+        try {
+            $data = $this->validateForm($form)->getData();
+
+            $requester = $manager->getUserByEmail($securityContext->getCustomerUser()->getEmail());
+
+            $params = [
+                "comment" => [
+                    "body" => $data["comment_reply"],
+                    "author_id" => $requester->users[0]->id
+                ]
+            ];
+
+            $manager->createComment($params, $id);
+
+            return $this->generateSuccessRedirect($form);
+
+        } catch (\Exception $e) {
+            $error_message = $e->getMessage();
+        }
+        $form->setErrorMessage($error_message);
+
+        $parserContext
+            ->addForm($form)
+            ->setGeneralError($error_message);
+
+        return $this->generateErrorRedirect($form);
     }
 
     private function getDateZendesk(string $dateTime, string $locale) :string

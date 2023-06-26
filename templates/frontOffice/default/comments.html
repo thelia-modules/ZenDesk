@@ -47,4 +47,32 @@
     <div class="text-center">
         <a class="Button Button--primary" href="#Modal-infos">{intl l="back to top" d='zendesk.fo.default'}</a>
     </div>
+    <br><hr><br>
+    <div class="text-center">
+        <div class="text-main font-bold text-lg">{intl l="ADD A COMMENT" d='zendesk.fo.default'}</div>
+
+        {form name="zendesk_form_zen_desk_ticket_comments_form"}
+        <form class="form" method="post" action="{url path="/zendesk/tickets/$ticketId/comments"}" {form_enctype form=$form}>
+            {form_hidden_fields form=$form}
+            {form_field field="success_url"}
+                <input type="hidden" name="{$name}" value="{url path='/account'}">
+            {/form_field}
+            {form_field field="error_url"}
+                <input type="hidden" name="{$name}" value="{url path='/account'}">
+            {/form_field}
+
+            {form_field form=$form field="comment_reply"}
+                <label>
+                    <div>
+                        <textarea name="{$name}" class="Input-field" {if $required} aria-required="true" required{/if} rows="5"></textarea>
+                    </div>
+                </label>
+            {/form_field}
+
+            <div class="text-center">
+                <button type="submit" class="Button Button--primary m-2">{intl l="Reply" d='zendesk.fo.default'}</button>
+            </div>
+        </form>
+        {/form}
+    </div>
 </div>
