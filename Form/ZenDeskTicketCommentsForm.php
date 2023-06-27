@@ -22,11 +22,11 @@ class ZenDeskTicketCommentsForm extends BaseForm
                     'label' => Translator::getInstance()->trans('comment_reply', [], ZenDesk::DOMAIN_NAME)
                 ])
             ->add(
-                "attachements",
+                "attachments",
                 FileType::class,
                 [
                     'required' => false,
-                    'label' => Translator::getInstance()->trans('attachements', [], ZenDesk::DOMAIN_NAME),
+                    'label' => Translator::getInstance()->trans('attachments', [], ZenDesk::DOMAIN_NAME),
                     'multiple' => true
                 ]
             )

@@ -3,6 +3,7 @@
 namespace ZenDesk\Form;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
@@ -92,6 +93,18 @@ class ZenDeskTicketForm extends BaseForm
                     'label' => Translator::getInstance()->trans('organization', [], ZenDesk::DOMAIN_NAME),
                     'label_attr' => [
                         'help' => Translator::getInstance()->trans('name of your organisation', [], ZenDesk::DOMAIN_NAME)
+                    ]
+                ]
+            )
+            ->add(
+                "attachments",
+                FileType::class,
+                [
+                    'required' => false,
+                    'label' => Translator::getInstance()->trans('attachments', [], ZenDesk::DOMAIN_NAME),
+                    'multiple' => true,
+                    'label_attr' => [
+                        'help' => Translator::getInstance()->trans('attachments of your ticket', [], ZenDesk::DOMAIN_NAME)
                     ]
                 ]
             )

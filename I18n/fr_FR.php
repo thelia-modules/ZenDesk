@@ -19,6 +19,8 @@ return array(
     'api_token' => 'API token',
     'api_username' => 'Nom d\'utilisateur Api',
     'assignee' => 'Assigné',
+    'attachments' => 'Pieces Jointes',
+    'attachments of your ticket' => 'pièces jointes du ticket',
     'comment_reply' => 'réponse',
     'description' => 'Description',
     'description of your issue' => 'description du ticket',

@@ -62,7 +62,11 @@ class FrontController extends BaseFrontController
 
             $params = [
                 "subject" => $data["subject"],
-                "description" => $data["description"],
+                "comment" => [
+                    "body" => $data["description"],
+                    "author_id" => $requester->users[0]->id,
+                    'uploads'   => $this->uploadFileGetToken($manager, $data["attachments"])
+                ],
                 "type" => $data["type"],
                 "status" => "new",
                 "priority" => $data["priority"],
@@ -139,29 +143,11 @@ class FrontController extends BaseFrontController
 
             $requester = $manager->getUserByEmail($securityContext->getCustomerUser()->getEmail());
 
-            $uploads = [];
-
-            if ($data["attachements"])
-            {
-                foreach ($data["attachements"] as $attachement)
-                {
-                    $upload = [
-                        "file" => $attachement->getpathname(),
-                        "type" => $attachement->getClientMimeType(),
-                        "name" => $attachement->getClientOriginalName()
-                    ];
-
-                    $attachment = $manager->uploadFile($upload);
-
-                    $uploads[] = $attachment->upload->token;
-                }
-            }
-
             $params = [
                 "comment" => [
                     "body" => $data["comment_reply"],
                     "author_id" => $requester->users[0]->id,
-                    'uploads'   => $uploads
+                    'uploads'   => $this->uploadFileGetToken($manager, $data["attachments"])
                 ]
             ];
 
@@ -178,6 +164,40 @@ class FrontController extends BaseFrontController
             ->setGeneralError($error_message);
 
         return $this->generateErrorRedirect($form);
+    }
+
+
+    /**
+     * Upload Files in Zendesk and get their token
+     *
+     * @param ZenDeskManager $manager
+     * @param array $attachments the files transmitted in form
+     * @return array of the token uploaded file
+     */
+    private function uploadFileGetToken(
+        ZenDeskManager $manager,
+        array $attachments
+    ): array
+    {
+        $uploads = [];
+
+        if ($attachments)
+        {
+            foreach ($attachments as $attachment)
+            {
+                $upload = [
+                    "file" => $attachment->getpathname(),
+                    "type" => $attachment->getClientMimeType(),
+                    "name" => $attachment->getClientOriginalName()
+                ];
+
+                $attachment = $manager->uploadFile($upload);
+
+                $uploads[] = $attachment->upload->token;
+            }
+        }
+
+        return $uploads;
     }
 
     private function getDateZendesk(string $dateTime, string $locale) :string
