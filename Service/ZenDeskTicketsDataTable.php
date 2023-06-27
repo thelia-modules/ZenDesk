@@ -52,7 +52,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         $json = [];
 
         if ($tickets !== null) {
-            $formatedTickets = $this->service->formatRetailerTickets($tickets);
+            $formatedTickets = $this->service->formatRetailerTickets($this->manager, $tickets);
 
             $json = [
                 "draw" => (int)$this->request->get('draw'),
@@ -65,6 +65,8 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 $json['data'][] = [
                     $formatedTicket["id"],
                     $formatedTicket["subject"],
+                    $formatedTicket["requester"],
+                    $formatedTicket["assignee"],
                     $formatedTicket["createdAt"],
                     $formatedTicket["updateAt"],
                     $formatedTicket["status"],
@@ -104,6 +106,18 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'targets' => ++$i,
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
+            ],
+            [
+                'name' => 'requester',
+                'targets' => ++$i,
+                'className' => "text-center",
+                'title' => Translator::getInstance()->trans('Requester', [], ZenDesk::DOMAIN_NAME),
+            ],
+            [
+                'name' => 'assignee',
+                'targets' => ++$i,
+                'className' => "text-center",
+                'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME),
             ],
             [
                 'name' => 'created_at',

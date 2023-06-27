@@ -22,7 +22,6 @@ class ConfigurationController extends AdminController
     #[Route('/configuration', name: 'configuration')]
     public function saveConfiguration(ParserContext $parserContext) : RedirectResponse|Response
     {
-
         $form = $this->createForm(ConfigurationForm::getName());
         try {
             $data = $this->validateForm($form)->getData();

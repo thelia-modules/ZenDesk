@@ -16,6 +16,17 @@ class ZenDeskManager
 
         return  $client->users()->search(array("query" => $mail));
     }
+
+    public function getUserById(int $id, HttpClient $client = null): ?\stdClass
+    {
+        if ($client === null){
+            $client = $this->authZendeskAdmin();
+        }
+
+        return  $client->users()->find($id);
+    }
+
+
     public function getTicketsUser(
         string $user,
         int    $page = -1,
@@ -28,15 +39,23 @@ class ZenDeskManager
         if ($stdCustomer->users != null) {
             $customerId = $stdCustomer->users[0]->id;
 
-            if ($page == -1 || $perPage == -1) {
-                //get all customer's ticket
-                $tickets = $client->users($customerId)->requests()->findAll(['sort_order' => 'desc']);
+            $tickets = [];
 
-                return get_object_vars($tickets);
+            if ($page == -1 || $perPage == -1) {
+                //get all customer's ticket requested
+                $tickets["requests"] = $client->users($customerId)->tickets()->requested(['sort_order' => 'desc'])->tickets;
+
+                //get all customer's ticket ccd
+                $tickets["cdd"] = $client->users($customerId)->tickets()->ccd(['sort_order' => 'desc'])->tickets;
+
+                //get all customer's ticket assigned
+                $tickets["assign"] = $client->users($customerId)->tickets()->assigned(['sort_order' => 'desc'])->tickets;
+
+                return $tickets;
             }
 
             //get all customer's ticket with page and limit
-            $tickets = $client->users($customerId)->requests()->findAll(['per_page' => $perPage, 'page' => $page, 'sort_order' => 'desc']);
+            $tickets = $client->users($customerId)->tickets()->requested(['per_page' => $perPage, 'page' => $page, 'sort_order' => 'desc']);
 
             return get_object_vars($tickets);
         }
