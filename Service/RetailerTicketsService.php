@@ -42,6 +42,8 @@ class RetailerTicketsService
                     $formatted_ticket["status"] = Translator::getInstance()->trans('solved', [], ZenDesk::DOMAIN_NAME);
                 }
 
+                $formatted_ticket["data-status"] = $ticket->status;
+
                 if (!$this->isIdExist($formatted_tickets, $formatted_ticket["id"])){
                     $formatted_tickets[$formatted_ticket["id"]] = $formatted_ticket;
                 }

@@ -10,6 +10,7 @@ use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
+use Thelia\Tools\URL;
 use ZenDesk\Form\ZenDeskTicketCommentsForm;
 use ZenDesk\Form\ZenDeskTicketForm;
 use ZenDesk\Service\RetailerTicketsService;
@@ -125,7 +126,8 @@ class FrontController extends BaseFrontController
         return $this->render("comments", [
             "comments" => $formattedComment,
             "ticketId" => $id,
-            "ticketName" => $ticketName
+            "ticketName" => $ticketName,
+            "status" => $ticket["ticket"]->status
          ]);
     }
 
@@ -151,7 +153,7 @@ class FrontController extends BaseFrontController
                 ]
             ];
 
-            $manager->createComment($params, $id);
+            $manager->updateTicket($params, $id);
 
             return $this->generateSuccessRedirect($form);
         } catch (\Exception $e) {
@@ -166,6 +168,29 @@ class FrontController extends BaseFrontController
         return $this->generateErrorRedirect($form);
     }
 
+    #[Route('/tickets/{id}/status/{status}', name: 'tickets_status', methods: 'GET')]
+    public function updateTicketStatus(
+        ZenDeskManager $manager,
+        int $id,
+        string $status
+    ){
+        if ($manager->getTicket($id)){
+
+            if (
+                strcmp($status,"open") ||
+                strcmp($status,"pending") ||
+                strcmp($status,"solved")
+            ) {
+                $params = [
+                    "status" => $status,
+                ];
+
+                $manager->updateTicket($params, $id);
+            }
+        }
+
+        return $this->generateRedirect(URL::getInstance()->absoluteUrl('/account'));
+    }
 
     /**
      * Upload Files in Zendesk and get their token

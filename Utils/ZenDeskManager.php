@@ -26,7 +26,6 @@ class ZenDeskManager
         return  $client->users()->find($id);
     }
 
-
     public function getTicketsUser(
         string $user,
         int    $page = -1,
@@ -110,7 +109,16 @@ class ZenDeskManager
         $client->tickets()->create($params);
     }
 
-    public function createComment(array $params, $id = null): void
+
+    /**
+     * Update is used to update parameters like status
+     * or adding a new comment for a ticket
+     *
+     * @param array $params
+     * @param $id
+     * @return void
+     */
+    public function updateTicket(array $params, $id = null): void
     {
         $client = $this->authZendeskAdmin();
 

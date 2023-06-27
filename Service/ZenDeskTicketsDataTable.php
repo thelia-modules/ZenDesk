@@ -65,11 +65,14 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 $json['data'][] = [
                     $formatedTicket["id"],
                     $formatedTicket["subject"],
-                    $formatedTicket["requester"],
-                    $formatedTicket["assignee"],
+                    //$formatedTicket["requester"],
+                    //$formatedTicket["assignee"],
                     $formatedTicket["createdAt"],
                     $formatedTicket["updateAt"],
-                    $formatedTicket["status"],
+                    [
+                        "status" => $formatedTicket["status"],
+                        "data_status" => $formatedTicket["data-status"]
+                    ],
                     [
                         'id' => $formatedTicket["id"],
                     ],
@@ -107,6 +110,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
             ],
+            /*
             [
                 'name' => 'requester',
                 'targets' => ++$i,
@@ -119,6 +123,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME),
             ],
+            */
             [
                 'name' => 'created_at',
                 'targets' => ++$i,
@@ -135,6 +140,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'name' => 'status',
                 'targets' => ++$i,
                 'className' => "text-center",
+                'render' => "renderStatus",
                 'title' => Translator::getInstance()->trans('Status', [], ZenDesk::DOMAIN_NAME),
             ],
             [

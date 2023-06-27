@@ -7,9 +7,16 @@
     {if $ticketId}
         <div class="Headline Headline--2 mb-6 font-bold text-main text-center">#{$ticketId} - {$ticketName}</div>
     {/if}
-    <div class="text-center">
+    <div class="text-center mb-2">
         <a class="Button Button--primary" href="#{count($comments)}">{intl l="show last message" d='zendesk.fo.default'}</a>
     </div>
+    <hr>
+    <div class="text-center m-2">
+        <a class="Button Button--{if $status == "open"}secondary{else}primary{/if}" href="{if $status == "open"}#{else}{url path="/zendesk/tickets/$ticketId/status/open"}{/if}">{intl l="Open" d='zendesk.fo.default'}</a>
+        <a class="Button Button--{if $status == "pending"}secondary{else}primary{/if}" href="{if $status == "pending"}#{else}{url path="/zendesk/tickets/$ticketId/status/pending"}{/if}">{intl l="Pending" d='zendesk.fo.default'}</a>
+        <a class="Button Button--{if $status == "solved"}secondary{else}primary{/if}" href="{if $status == "solved"}#{else}{url path="/zendesk/tickets/$ticketId/status/solved"}{/if}">{intl l="Solved" d='zendesk.fo.default'}</a>
+    </div>
+    <hr>
     <div>
         {foreach from=$comments item=comment key=k}
             <div id="{$k+1}" class="mt-6">
