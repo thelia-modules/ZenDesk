@@ -2,7 +2,9 @@
 
 namespace ZenDesk\Service;
 
+use DateTime;
 use EasyDataTableManager\Service\DataTable\BaseDataTable;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -52,31 +54,39 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         $json = [];
 
         if ($tickets !== null) {
-            $formatedTickets = $this->service->formatRetailerTickets($this->manager, $tickets);
+            $formattedTickets = $this->service->formatRetailerTickets($this->manager, $tickets);
+
+            $sortedTickets = $this->sortOrder($formattedTickets);
 
             $json = [
                 "draw" => (int)$this->request->get('draw'),
-                "recordsTotal" => count($tickets["requests"]),
-                "recordsFiltered" => count($tickets["requests"]),
+                "recordsTotal" => count($sortedTickets),
+                "recordsFiltered" => count($sortedTickets),
                 "data" => [],
             ];
 
-            foreach ($formatedTickets as $formatedTicket) {
-                $json['data'][] = [
-                    $formatedTicket["id"],
-                    $formatedTicket["subject"],
-                    //$formatedTicket["requester"],
-                    //$formatedTicket["assignee"],
-                    $formatedTicket["createdAt"],
-                    $formatedTicket["updateAt"],
+            foreach ($sortedTickets as $ticket)
+            {
+                $createdAt = new DateTime($ticket["created_at"]);
+                $updateAt = new DateTime($ticket["update_at"]);
+
+                $json['data'][] =
                     [
-                        "status" => $formatedTicket["status"],
-                        "data_status" => $formatedTicket["data-status"]
-                    ],
-                    [
-                        'id' => $formatedTicket["id"],
-                    ],
-                ];
+                        $ticket["id"],
+                        $ticket["subject"],
+                        $ticket["requester"],
+                        $ticket["assignee"],
+                        $createdAt->format('d/m/Y'),
+                        $updateAt->format('d/m/Y'),
+                        [
+                            "status" => $ticket["status"],
+                            "data_status" => $ticket["data-status"]
+                        ],
+                        [
+                            'id' => $ticket["id"],
+                        ]
+                    ]
+                ;
             }
         }
 
@@ -91,6 +101,44 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     public function getRendersTemplate($params = []): string
     {
         return $this->parser->render('datatable/render/zendesk.render.datatable.tickets.js.html', []);
+    }
+
+    public function sortOrder(array $tickets): array
+    {
+        $columnDefinition = $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']];
+        $sort = (string)$this->request->get('order')[0]['dir'] === 'asc' ? Criteria::ASC : Criteria::DESC;
+
+        if (!(int)$this->request->get('order')[0]['column'])
+        {
+           //order by update date desc + status asc
+            usort($tickets, function($a, $b) use ($columnDefinition)
+            {
+                $resDate = -strcmp($a["update_at"], $b["update_at"]);
+                $resStatus = strcmp($a["data-status"], $b["data-status"]);
+
+                return $resDate + $resStatus;
+            });
+
+            return $tickets;
+        }
+
+        if (strcmp($sort, "ASC"))
+        {
+            usort($tickets, function($a, $b) use ($columnDefinition)
+            {
+                return -strcmp($a[$columnDefinition["name"]], $b[$columnDefinition["name"]]);
+            });
+        }
+
+        if (strcmp($sort, "DESC"))
+        {
+            usort($tickets, function($a, $b) use ($columnDefinition)
+            {
+                return strcmp($a[$columnDefinition["name"]], $b[$columnDefinition["name"]]);
+            });
+        }
+
+        return $tickets;
     }
 
     public function getDefineColumnsDefinition($type): array
@@ -110,7 +158,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
             ],
-            /*
+
             [
                 'name' => 'requester',
                 'targets' => ++$i,
@@ -123,7 +171,6 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME),
             ],
-            */
             [
                 'name' => 'created_at',
                 'targets' => ++$i,

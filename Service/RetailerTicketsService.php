@@ -2,7 +2,6 @@
 
 namespace ZenDesk\Service;
 
-use DateTime;
 use Thelia\Core\Translation\Translator;
 use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
@@ -17,17 +16,14 @@ class RetailerTicketsService
         foreach ($tickets as $ticketsType) {
             foreach ($ticketsType as $ticket)
             {
-                $createdAt = new DateTime($ticket->created_at);
-                $updateAt = new DateTime($ticket->updated_at);
-
                 $formatted_ticket["subject"] = $ticket->subject;
                 $formatted_ticket["id"] = $ticket->id;
 
                 $formatted_ticket["requester"] = $manager->getUserById($ticket->requester_id)->user->name;
                 $formatted_ticket["assignee"] = $manager->getUserById($ticket->assignee_id)->user->name;
 
-                $formatted_ticket["createdAt"] = $createdAt->format('d/m/Y');
-                $formatted_ticket["updateAt"] = $updateAt->format('d/m/Y');
+                $formatted_ticket["created_at"] = $ticket->created_at;
+                $formatted_ticket["update_at"] = $ticket->updated_at;
 
                 if ($ticket->status === "new"){
                     $formatted_ticket["status"] = Translator::getInstance()->trans('new', [], ZenDesk::DOMAIN_NAME);
@@ -49,8 +45,6 @@ class RetailerTicketsService
                 }
             }
         }
-
-        krsort($formatted_tickets);
 
         return $formatted_tickets;
     }

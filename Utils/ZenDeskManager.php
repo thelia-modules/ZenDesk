@@ -54,9 +54,15 @@ class ZenDeskManager
             }
 
             //get all customer's ticket with page and limit
-            $tickets = $client->users($customerId)->tickets()->requested(['per_page' => $perPage, 'page' => $page, 'sort_order' => 'desc']);
+            $tickets["requests"] = $client->users($customerId)->tickets()->requested(['per_page' => $perPage, 'page' => $page, 'sort_order' => 'desc']);
 
-            return get_object_vars($tickets);
+            //get all customer's ticket ccd with page and limit
+            $tickets["cdd"] = $client->users($customerId)->tickets()->ccd(['per_page' => $perPage, 'page' => $page, 'sort_order' => 'desc'])->tickets;
+
+            //get all customer's ticket assigned with page and limit
+            $tickets["assign"] = $client->users($customerId)->tickets()->assigned(['per_page' => $perPage, 'page' => $page, 'sort_order' => 'desc'])->tickets;
+
+            return $tickets;
         }
         return null;
     }
