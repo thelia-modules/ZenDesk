@@ -115,7 +115,6 @@ class ZenDeskManager
         $client->tickets()->create($params);
     }
 
-
     /**
      * Update is used to update parameters like status
      * or adding a new comment for a ticket
@@ -150,5 +149,18 @@ class ZenDeskManager
         $client = $this->authZendeskAdmin();
 
         return $client->organizations()->findAll()->organizations;
+    }
+
+    public function getOrganizationId(string $organization) :?int
+    {
+        $organizations = $this->getAllOrganization();
+
+        foreach ($organizations as $oneOrganization){
+            if ($oneOrganization->name === $organization){
+                return $oneOrganization->id;
+            }
+        }
+
+        return null;
     }
 }

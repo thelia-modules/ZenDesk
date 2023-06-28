@@ -3,17 +3,17 @@
 namespace ZenDesk\Controller;
 
 use IntlDateFormatter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
 use Thelia\Tools\URL;
 use ZenDesk\Form\ZenDeskTicketCommentsForm;
 use ZenDesk\Form\ZenDeskTicketForm;
-use ZenDesk\Service\RetailerTicketsService;
 use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
 
@@ -24,9 +24,9 @@ class FrontController extends BaseFrontController
     public function createNewTickets(
         SecurityContext $securityContext,
         ZenDeskManager $manager,
-        RetailerTicketsService $service,
         ParserContext $parserContext
-    ) {
+    ): Response|null
+    {
         $form = $this->createForm(ZenDeskTicketForm::getName());
 
         try {
@@ -51,7 +51,7 @@ class FrontController extends BaseFrontController
                 ));
             }
 
-            $organization_id = $service->getOrganizationId($manager, $data["organization"]);
+            $organization_id = $manager->getOrganizationId($data["organization"]);
 
             if (!$organization_id){
                 throw new \Exception(Translator::getInstance()->trans(
@@ -137,7 +137,7 @@ class FrontController extends BaseFrontController
         ZenDeskManager $manager,
         ParserContext $parserContext,
         $id
-    ) {
+    ): RedirectResponse|Response|null {
         $form = $this->createForm(ZenDeskTicketCommentsForm::getName());
 
         try {
@@ -173,7 +173,8 @@ class FrontController extends BaseFrontController
         ZenDeskManager $manager,
         int $id,
         string $status
-    ){
+    ): RedirectResponse|Response
+    {
         if ($manager->getTicket($id)){
 
             if (

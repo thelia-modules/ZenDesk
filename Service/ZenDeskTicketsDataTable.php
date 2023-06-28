@@ -22,7 +22,6 @@ class ZenDeskTicketsDataTable extends BaseDataTable
 
     public function __construct(
         protected ZenDeskManager           $manager,
-        protected RetailerTicketsService   $service,
         protected SecurityContext          $securityContext,
         RequestStack             $requestStack,
         EventDispatcherInterface $dispatcher,
@@ -43,10 +42,11 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function buildResponseData($type): Response
     {
-        $zenDeskUrl = "https://" . ZenDesk::getConfigValue("zen_desk_api_subdomain") . ".zendesk.com/agent/tickets/";
-
         $tickets = $this->manager->getTicketsUser(
             $this->securityContext->getCustomerUser()->getEmail(),
         );
@@ -54,9 +54,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         $json = [];
 
         if ($tickets !== null) {
-            $formattedTickets = $this->service->formatRetailerTickets($this->manager, $tickets);
-
-            $sortedTickets = $this->sortOrder($formattedTickets);
+            $sortedTickets = $this->sortOrder($tickets);
 
             $json = [
                 "draw" => (int)$this->request->get('draw'),
@@ -67,23 +65,23 @@ class ZenDeskTicketsDataTable extends BaseDataTable
 
             foreach ($sortedTickets as $ticket)
             {
-                $createdAt = new DateTime($ticket["created_at"]);
-                $updateAt = new DateTime($ticket["update_at"]);
+                $createdAt = new DateTime($ticket->created_at);
+                $updateAt = new DateTime($ticket->updated_at);
 
                 $json['data'][] =
                     [
-                        $ticket["id"],
-                        $ticket["subject"],
-                        $ticket["requester"],
-                        $ticket["assignee"],
+                        $ticket->id,
+                        $ticket->subject,
+                        $this->manager->getUserById($ticket->requester_id)->user->name,
+                        $this->manager->getUserById($ticket->submitter_id)->user->name,
                         $createdAt->format('d/m/Y'),
                         $updateAt->format('d/m/Y'),
                         [
-                            "status" => $ticket["status"],
-                            "data_status" => $ticket["data-status"]
+                            "status" => $this->translateStatus($ticket->status),
+                            "data_status" => $ticket->status
                         ],
                         [
-                            'id' => $ticket["id"],
+                            'id' => $ticket->id,
                         ]
                     ]
                 ;
@@ -93,18 +91,26 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         return new JsonResponse($json);
     }
 
+    /**
+     * @throws \SmartyException
+     */
     public function getFiltersTemplate($params = []): string
     {
         return $this->parser->render('datatable/render/zendesk.render.datatable.tickets.js.html', []);
     }
 
+    /**
+     * @throws \SmartyException
+     */
     public function getRendersTemplate($params = []): string
     {
         return $this->parser->render('datatable/render/zendesk.render.datatable.tickets.js.html', []);
     }
 
-    public function sortOrder(array $tickets): array
+    private function sortOrder(array $arrayTickets): array
     {
+        $tickets = $this->formatTickets($arrayTickets);
+
         $columnDefinition = $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']];
         $sort = (string)$this->request->get('order')[0]['dir'] === 'asc' ? Criteria::ASC : Criteria::DESC;
 
@@ -113,8 +119,8 @@ class ZenDeskTicketsDataTable extends BaseDataTable
            //order by update date desc + status asc
             usort($tickets, function($a, $b) use ($columnDefinition)
             {
-                $resDate = -strcmp($a["update_at"], $b["update_at"]);
-                $resStatus = strcmp($a["data-status"], $b["data-status"]);
+                $resDate = -strcmp($a->updated_at, $b->updated_at);
+                $resStatus = strcmp($a->status, $b->status);
 
                 return $resDate + $resStatus;
             });
@@ -126,7 +132,8 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         {
             usort($tickets, function($a, $b) use ($columnDefinition)
             {
-                return -strcmp($a[$columnDefinition["name"]], $b[$columnDefinition["name"]]);
+                $index = $columnDefinition["name"];
+                return -strcmp($a->$index, $b->$index);
             });
         }
 
@@ -134,18 +141,52 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         {
             usort($tickets, function($a, $b) use ($columnDefinition)
             {
-                return strcmp($a[$columnDefinition["name"]], $b[$columnDefinition["name"]]);
+                $index = $columnDefinition["name"];
+                return strcmp($a->$index, $b->$index);
             });
         }
 
         return $tickets;
     }
 
+    private function formatTickets(array $tickets): array
+    {
+        $formatted_tickets = [];
+
+        foreach ($tickets as $ticketType)
+        {
+            foreach ($ticketType as $ticket)
+            {
+                $formatted_tickets[$ticket->id] = $ticket;
+            }
+        }
+
+        return $formatted_tickets;
+    }
+
+    private function translateStatus(string $status): ?string
+    {
+        if ($status === "new"){
+            return Translator::getInstance()->trans('new', [], ZenDesk::DOMAIN_NAME);
+        }
+        if ($status === "open"){
+            return Translator::getInstance()->trans('open', [], ZenDesk::DOMAIN_NAME);
+        }
+        if ($status === "pending"){
+            return Translator::getInstance()->trans('pending', [], ZenDesk::DOMAIN_NAME);
+        }
+        if ($status === "solved"){
+            return Translator::getInstance()->trans('solved', [], ZenDesk::DOMAIN_NAME);
+        }
+
+        return null;
+    }
+
     public function getDefineColumnsDefinition($type): array
     {
         $i = -1;
 
-        $definitions = [
+        return [
             [
                 'name' => 'id',
                 'targets' => ++$i,
@@ -160,13 +201,13 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             ],
 
             [
-                'name' => 'requester',
+                'name' => 'requester_id',
                 'targets' => ++$i,
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Requester', [], ZenDesk::DOMAIN_NAME),
             ],
             [
-                'name' => 'assignee',
+                'name' => 'assignee_id',
                 'targets' => ++$i,
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME),
@@ -178,7 +219,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'title' => Translator::getInstance()->trans('Created At', [], ZenDesk::DOMAIN_NAME),
             ],
             [
-                'name' => 'update_at',
+                'name' => 'updated_at',
                 'targets' => ++$i,
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Update At', [], ZenDesk::DOMAIN_NAME),
@@ -198,8 +239,6 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'title' => Translator::getInstance()->trans('Actions', [], ZenDesk::DOMAIN_NAME),
             ],
         ];
-
-        return $definitions;
     }
 
     public function handleSearch(ModelCriteria $query): void
