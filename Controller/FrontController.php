@@ -2,6 +2,7 @@
 
 namespace ZenDesk\Controller;
 
+use EasyDataTableManager\EasyDataTableManager;
 use IntlDateFormatter;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -127,7 +128,8 @@ class FrontController extends BaseFrontController
             "comments" => $formattedComment,
             "ticketId" => $id,
             "ticketName" => $ticketName,
-            "status" => $ticket["ticket"]->status
+            "status" => $ticket["ticket"]->status,
+            "zendesk_rules" => (bool)ZenDesk::getConfigValue("zen_desk_user_rules")
          ]);
     }
 

@@ -54,6 +54,8 @@
     <div class="text-center">
         <a class="Button Button--primary" href="#Modal-infos">{intl l="back to top" d='zendesk.fo.default'}</a>
     </div>
+
+    {if $zendesk_rules}
     <br><hr><br>
     <div class="text-center">
         <div class="text-main font-bold text-lg">{intl l="ADD A COMMENT" d='zendesk.fo.default'}</div>
@@ -88,4 +90,5 @@
         </form>
         {/form}
     </div>
+    {/if}
 </div>

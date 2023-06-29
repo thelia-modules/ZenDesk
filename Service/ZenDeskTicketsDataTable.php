@@ -37,7 +37,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
      */
     public function hasTickets(): bool
     {
-        return 0 < $this->manager->getTicketsUser(
+        return 0 < $this->manager->getSumTicketsByUser(
                 $this->securityContext->getCustomerUser()->getEmail(),
             );
     }
@@ -47,8 +47,13 @@ class ZenDeskTicketsDataTable extends BaseDataTable
      */
     public function buildResponseData($type): Response
     {
-        $tickets = $this->manager->getTicketsUser(
+        $tickets = $this->manager->getTicketsByUser(
             $this->securityContext->getCustomerUser()->getEmail(),
+            1
+        );
+
+        $sumTickets = $this->manager->getSumTicketsByUser(
+            $this->securityContext->getCustomerUser()->getEmail()
         );
 
         $json = [];
@@ -58,22 +63,31 @@ class ZenDeskTicketsDataTable extends BaseDataTable
 
             $json = [
                 "draw" => (int)$this->request->get('draw'),
-                "recordsTotal" => count($sortedTickets),
-                "recordsFiltered" => count($sortedTickets),
+                "recordsTotal" => $sumTickets,
+                "recordsFiltered" => $sumTickets,
                 "data" => [],
+                "tickets" => count($tickets)
             ];
-
             foreach ($sortedTickets as $ticket)
             {
                 $createdAt = new DateTime($ticket->created_at);
                 $updateAt = new DateTime($ticket->updated_at);
 
+                $user = null;
+
+                if (0 === strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "assigned")){
+                    $user = $this->manager->getUserById($ticket->requester_id)->user->name;
+                }
+
+                if (0 === strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "requested")){
+                    $user = $this->manager->getUserById($ticket->submitter_id)->user->name;
+                }
+
                 $json['data'][] =
                     [
                         $ticket->id,
                         $ticket->subject,
-                        $this->manager->getUserById($ticket->requester_id)->user->name,
-                        $this->manager->getUserById($ticket->submitter_id)->user->name,
+                        $user,
                         $createdAt->format('d/m/Y'),
                         $updateAt->format('d/m/Y'),
                         [
@@ -119,10 +133,10 @@ class ZenDeskTicketsDataTable extends BaseDataTable
            //order by update date desc + status asc
             usort($tickets, function($a, $b) use ($columnDefinition)
             {
-                $resDate = -strcmp($a->updated_at, $b->updated_at);
-                $resStatus = strcmp($a->status, $b->status);
+                $resDate = strcmp($a->updated_at, $b->updated_at);
+                $resStatus = strcmp($a->status, $b->status)*10;
 
-                return $resDate + $resStatus;
+                return $resStatus - $resDate;
             });
 
             return $tickets;
@@ -199,19 +213,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'className' => "text-center",
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
             ],
-
-            [
-                'name' => 'requester_id',
-                'targets' => ++$i,
-                'className' => "text-center",
-                'title' => Translator::getInstance()->trans('Requester', [], ZenDesk::DOMAIN_NAME),
-            ],
-            [
-                'name' => 'assignee_id',
-                'targets' => ++$i,
-                'className' => "text-center",
-                'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME),
-            ],
+            $this->getDefineColumnsUser(++$i),
             [
                 'name' => 'created_at',
                 'targets' => ++$i,
@@ -239,6 +241,29 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'title' => Translator::getInstance()->trans('Actions', [], ZenDesk::DOMAIN_NAME),
             ],
         ];
+    }
+
+    private function getDefineColumnsUser(int $i): ?array
+    {
+        if (0 === strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "assigned")){
+            return [
+                'name' => 'requester_id',
+                'targets' => $i,
+                'className' => "text-center",
+                'title' => Translator::getInstance()->trans('Requester', [], ZenDesk::DOMAIN_NAME),
+            ];
+        }
+
+        if (0 === strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "requested")){
+            return [
+                'name' => 'assignee_id',
+                'targets' => $i,
+                'className' => "text-center",
+                'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME),
+            ];
+        }
+
+        return null;
     }
 
     public function handleSearch(ModelCriteria $query): void

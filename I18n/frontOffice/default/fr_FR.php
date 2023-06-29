@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'ADD A COMMENT' => 'AJOUTER UN COMMENTAIRE',
+    'ADD A COMMENT' => 'RÉDIGER UN COMMENTAIRE',
     'Open' => 'Ouvert',
     'Open Ticket comments' => 'Ouvrir les commentaires',
     'Pending' => 'En Attente',
