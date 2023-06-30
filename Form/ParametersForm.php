@@ -15,24 +15,6 @@ class ParametersForm extends BaseForm
     {
         $this->formBuilder
             ->add(
-                'size_datatable',
-                IntegerType::class,
-                [
-                    'label' =>Translator::getInstance()->trans("Size Tickets List", [], ZenDesk::DOMAIN_NAME),
-                    'required'   => true,
-                    'empty_data' => 10,
-                    'label_attr' => [
-                        'for' => 'size_datatable',
-                        'help' => Translator::getInstance()->trans(
-                            "size of the table displaying tickets",
-                            [],
-                            ZenDesk::DOMAIN_NAME
-                        )
-                    ],
-                    'data' => ZenDesk::getConfigValue('zen_desk_max_size')
-                ]
-            )
-            ->add(
                 'user_rules',
                 ChoiceType::class,
                 [
@@ -72,14 +54,6 @@ class ParametersForm extends BaseForm
                         )
                     ],
                     'data' => ZenDesk::getConfigValue('zen_desk_ticket_type')
-                ]
-            )
-            ->add(
-                'using_easy_datatable_manager',
-                CheckboxType::class,
-                [
-                    'label' => Translator::getInstance()->trans("Using EasyDataTableManager module ?", [], ZenDesk::DOMAIN_NAME),
-                    'data' => (bool)ZenDesk::getConfigValue('zen_desk_using_easy_datatable_manager')
                 ]
             )
         ;

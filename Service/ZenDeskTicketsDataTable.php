@@ -47,10 +47,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
      */
     public function buildResponseData($type): Response
     {
-        $tickets = $this->manager->getTicketsByUser(
-            $this->securityContext->getCustomerUser()->getEmail(),
-            1
-        );
+        $tickets = $this->manager->getTicketsByUser($this->securityContext->getCustomerUser()->getEmail());
 
         $sumTickets = $this->manager->getSumTicketsByUser(
             $this->securityContext->getCustomerUser()->getEmail()
@@ -130,7 +127,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
 
         if (!(int)$this->request->get('order')[0]['column'])
         {
-           //order by update date desc + status asc
+            //order by update date desc + status asc
             usort($tickets, function($a, $b) use ($columnDefinition)
             {
                 $resDate = strcmp($a->updated_at, $b->updated_at);
@@ -171,7 +168,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         {
             foreach ($ticketType as $ticket)
             {
-                $formatted_tickets[$ticket->id] = $ticket;
+                $formatted_tickets[] = $ticket;
             }
         }
 
@@ -204,39 +201,39 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             [
                 'name' => 'id',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center id",
                 'title' => Translator::getInstance()->trans('ID', [], ZenDesk::DOMAIN_NAME),
             ],
             [
                 'name' => 'subject',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center subject",
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
             ],
             $this->getDefineColumnsUser(++$i),
             [
                 'name' => 'created_at',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center createdat",
                 'title' => Translator::getInstance()->trans('Created At', [], ZenDesk::DOMAIN_NAME),
             ],
             [
                 'name' => 'updated_at',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center updatedat",
                 'title' => Translator::getInstance()->trans('Update At', [], ZenDesk::DOMAIN_NAME),
             ],
             [
                 'name' => 'status',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center status",
                 'render' => "renderStatus",
                 'title' => Translator::getInstance()->trans('Status', [], ZenDesk::DOMAIN_NAME),
             ],
             [
                 'name' => 'comments',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center comments",
                 'render' => "renderCommentsFunction",
                 'title' => Translator::getInstance()->trans('Actions', [], ZenDesk::DOMAIN_NAME),
             ],
@@ -249,7 +246,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             return [
                 'name' => 'requester_id',
                 'targets' => $i,
-                'className' => "text-center",
+                'className' => "text-center user",
                 'title' => Translator::getInstance()->trans('Requester', [], ZenDesk::DOMAIN_NAME),
             ];
         }
@@ -258,7 +255,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             return [
                 'name' => 'assignee_id',
                 'targets' => $i,
-                'className' => "text-center",
+                'className' => "text-center user",
                 'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME),
             ];
         }

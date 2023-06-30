@@ -55,16 +55,6 @@ class ConfigurationController extends AdminController
         try {
             $data = $this->validateForm($form)->getData();
 
-            ZenDesk::setConfigValue("zen_desk_using_easy_datatable_manager", $data["using_easy_datatable_manager"]);
-
-            if ($data["using_easy_datatable_manager"])
-            {
-                EasyDataTableManager::setConfigValue("zen_desk_max_size", $data["size_datatable"]);
-                EasyDataTableManager::setConfigValue("zen_desk_user_rules", $data["user_rules"]);
-                EasyDataTableManager::setConfigValue("zen_desk_ticket_type", $data["ticket_type"]);
-            }
-
-            ZenDesk::setConfigValue("zen_desk_max_size", $data["size_datatable"]);
             ZenDesk::setConfigValue("zen_desk_user_rules", $data["user_rules"]);
             ZenDesk::setConfigValue("zen_desk_ticket_type", $data["ticket_type"]);
 

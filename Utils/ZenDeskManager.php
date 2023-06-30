@@ -26,25 +26,22 @@ class ZenDeskManager
         return  $client->users()->find($id);
     }
 
-    public function getTicketsByUser(
-        string $user,
-        int    $page
-    ):? array
+    public function getTicketsByUser(string $user): ?array
     {
         $tickets = [];
         $option = ZenDesk::getConfigValue("zen_desk_ticket_type");
 
         if (0 === strcmp($option, "assigned")){
-            $tickets["assigned"] = $this->getTicketsAssignedByUser($user, $page);
+            $tickets["assigned"] = $this->getTicketsAssignedByUser($user);
         }
 
         if (0 === strcmp($option, "requested")){
-            $tickets["requested"] = $this->getTicketsRequestedByUser($user, $page);
+            $tickets["requested"] = $this->getTicketsRequestedByUser($user);
         }
 
         if (0 === strcmp($option, "all")){
-            $tickets["requested"] = $this->getTicketsRequestedByUser($user, $page);
-            $tickets["assigned"] = $this->getTicketsAssignedByUser($user, $page);
+            $tickets["requested"] = $this->getTicketsRequestedByUser($user);
+            $tickets["assigned"] = $this->getTicketsAssignedByUser($user);
         }
 
         return $tickets;
@@ -68,10 +65,7 @@ class ZenDeskManager
             ;
     }
 
-    private function getTicketsRequestedByUser(
-        string $user,
-        int    $page = -1
-    ): ?array
+    private function getTicketsRequestedByUser(string $user,): ?array
     {
         $client = $this->authZendeskAdmin();
 
@@ -80,25 +74,12 @@ class ZenDeskManager
         if ($stdCustomer->users != null) {
             $customerId = $stdCustomer->users[0]->id;
 
-            if ($page == -1) {
-                return $client->users($customerId)->tickets()->requested(['sort_order' => 'desc'])->tickets;
-            }
-
-            return $client->users($customerId)->tickets()->requested(
-                [
-                    'per_page' => ZenDesk::getConfigValue("zen_desk_max_size"),
-                    'page' => $page,
-                    'sort_order' => 'desc'
-                ])->tickets;
+            return $client->users($customerId)->tickets()->requested()->tickets;
         }
         return null;
     }
 
-    private function getTicketsAssignedByUser(
-        string $user,
-        int    $page = -1,
-        int    $perPage = -1
-    ): ?array
+    private function getTicketsAssignedByUser(string $user): ?array
     {
         $client = $this->authZendeskAdmin();
 
@@ -107,16 +88,7 @@ class ZenDeskManager
         if ($stdCustomer->users != null) {
             $customerId = $stdCustomer->users[0]->id;
 
-            if ($page == -1 || $perPage == -1) {
-                return $client->users($customerId)->tickets()->assigned(['sort_order' => 'desc'])->tickets;
-            }
-
-            return $client->users($customerId)->tickets()->assigned(
-                [
-                    'per_page' => ZenDesk::getConfigValue("zen_desk_max_size"),
-                    'page' => $page,
-                    'sort_order' => 'desc'
-                ])->tickets;
+            return $client->users($customerId)->tickets()->assigned()->tickets;
         }
         return null;
     }
