@@ -2,12 +2,35 @@
 
 namespace ZenDesk\Utils;
 
+use Zendesk\API\Exceptions\CustomException;
+use Zendesk\API\Exceptions\MissingParametersException;
 use Zendesk\API\HttpClient;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use ZenDesk\ZenDesk;
 
 class ZenDeskManager
 {
+    private function authZendeskAdmin(): ZendeskAPI
+    {
+        $client = new ZendeskAPI(ZenDesk::getConfigValue("zen_desk_api_subdomain"));
+        $client->setAuth('basic',
+            [
+                'username' => ZenDesk::getConfigValue("zen_desk_api_username"),
+                'token' => ZenDesk::getConfigValue("zen_desk_api_token")
+            ]
+        );
+
+        return $client;
+    }
+
+
+    public function getAllUsers()
+    {
+        $client = $this->authZendeskAdmin();
+
+        return $client->users()->findAll()->users;
+    }
+
     public function getUserByEmail(string $mail, HttpClient $client = null): ?\stdClass
     {
         if ($client === null){
@@ -26,43 +49,29 @@ class ZenDeskManager
         return  $client->users()->find($id);
     }
 
+
     public function getTicketsByUser(string $user): ?array
     {
         $tickets = [];
         $option = ZenDesk::getConfigValue("zen_desk_ticket_type");
 
-        if (0 === strcmp($option, "assigned")){
+        if ($option === "assigned")
+        {
             $tickets["assigned"] = $this->getTicketsAssignedByUser($user);
         }
 
-        if (0 === strcmp($option, "requested")){
+        if ($option === "requested")
+        {
             $tickets["requested"] = $this->getTicketsRequestedByUser($user);
         }
 
-        if (0 === strcmp($option, "all")){
+        if ($option === "all")
+        {
             $tickets["requested"] = $this->getTicketsRequestedByUser($user);
             $tickets["assigned"] = $this->getTicketsAssignedByUser($user);
         }
 
         return $tickets;
-    }
-
-    public function getSumTicketsByUser(string $user): int
-    {
-        $option = ZenDesk::getConfigValue("zen_desk_ticket_type");
-
-        if (0 === strcmp($option, "assigned")){
-            return $this->getSumTicketsAssignedByUser($user);
-        }
-
-        if (0 === strcmp($option, "requested")){
-            return $this->getSumTicketsRequestedByUser($user);
-        }
-
-        return
-            $this->getSumTicketsRequestedByUser($user) +
-            $this->getSumTicketsAssignedByUser($user)
-            ;
     }
 
     private function getTicketsRequestedByUser(string $user,): ?array
@@ -91,6 +100,27 @@ class ZenDeskManager
             return $client->users($customerId)->tickets()->assigned()->tickets;
         }
         return null;
+    }
+
+
+    public function getSumTicketsByUser(string $user): int
+    {
+        $option = ZenDesk::getConfigValue("zen_desk_ticket_type");
+
+        if ($option === "assigned")
+        {
+            return $this->getSumTicketsAssignedByUser($user);
+        }
+
+        if ($option === "requested")
+        {
+            return $this->getSumTicketsRequestedByUser($user);
+        }
+
+        return
+            $this->getSumTicketsRequestedByUser($user) +
+            $this->getSumTicketsAssignedByUser($user)
+            ;
     }
 
     public function getSumTicketsRequestedByUser(string $user): int
@@ -123,25 +153,6 @@ class ZenDeskManager
         return  0;
     }
 
-    public function getAllUsers()
-    {
-        $client = $this->authZendeskAdmin();
-
-        return $client->users()->findAll()->users;
-    }
-
-    private function authZendeskAdmin(): ZendeskAPI
-    {
-        $client = new ZendeskAPI(ZenDesk::getConfigValue("zen_desk_api_subdomain"));
-        $client->setAuth('basic',
-            [
-                'username' => ZenDesk::getConfigValue("zen_desk_api_username"),
-                'token' => ZenDesk::getConfigValue("zen_desk_api_token")
-            ]
-        );
-
-        return $client;
-    }
 
     public function getCommentTicket(int $id): array
     {
@@ -156,6 +167,7 @@ class ZenDeskManager
 
         return get_object_vars($client->users()->find($author_id));
     }
+
 
     public function getTicket($id): array
     {
@@ -186,12 +198,23 @@ class ZenDeskManager
         $client->tickets()->update($id, $params);
     }
 
+    /**
+     * Upload a file to Zendesk
+     * You need to upload a file before set it to your ticket
+     * Return the upload param of a comment (cf Zendesk docs)
+     *
+     * @param array $upload
+     * @return \stdClass|null
+     * @throws CustomException
+     * @throws MissingParametersException
+     */
     public function uploadFile(array $upload): ?\stdClass
     {
         $client = $this->authZendeskAdmin();
 
         return $client->attachments()->upload($upload);
     }
+
 
     public function getAllGroup()
     {

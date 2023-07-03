@@ -180,9 +180,9 @@ class FrontController extends BaseFrontController
         if ($manager->getTicket($id)){
 
             if (
-                strcmp($status,"open") ||
-                strcmp($status,"pending") ||
-                strcmp($status,"solved")
+                $status ==="open" ||
+                $status === "pending" ||
+                $status ==="solved"
             ) {
                 $params = [
                     "status" => $status,

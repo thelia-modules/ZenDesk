@@ -2,7 +2,6 @@
 
 namespace ZenDesk\Service;
 
-use DateTime;
 use EasyDataTableManager\Service\DataTable\BaseDataTable;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -21,25 +20,16 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     protected $request;
 
     public function __construct(
-        protected ZenDeskManager           $manager,
-        protected SecurityContext          $securityContext,
-        RequestStack             $requestStack,
-        EventDispatcherInterface $dispatcher,
-        ParserInterface          $parser,
+        protected ZenDeskManager    $manager,
+        protected SecurityContext   $securityContext,
+        protected ZendeskService    $service,
+        RequestStack                $requestStack,
+        EventDispatcherInterface    $dispatcher,
+        ParserInterface             $parser,
     )
     {
         parent::__construct($requestStack, $dispatcher, $parser);
         $this->request = $requestStack->getCurrentRequest();
-    }
-
-    /**
-     * @return bool true if retailer has tickets
-     */
-    public function hasTickets(): bool
-    {
-        return 0 < $this->manager->getSumTicketsByUser(
-                $this->securityContext->getCustomerUser()->getEmail(),
-            );
     }
 
     /**
@@ -56,7 +46,11 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         $json = [];
 
         if ($tickets !== null) {
-            $sortedTickets = $this->sortOrder($tickets);
+            $sortedTickets = $this->service->sortOrder(
+                $this->request->get('order')[0],
+                $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']],
+                $tickets
+            );
 
             $json = [
                 "draw" => (int)$this->request->get('draw'),
@@ -67,7 +61,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             ];
             foreach ($sortedTickets as $ticket)
             {
-                $json['data'][] = $this->jsonFormat($ticket);
+                $json['data'][] = $this->service->jsonFormat($ticket);
             }
         }
 
@@ -88,142 +82,6 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     public function getRendersTemplate($params = []): string
     {
         return $this->parser->render('datatable/render/zendesk.render.datatable.tickets.js.html', []);
-    }
-
-    private function jsonFormat(\stdClass $ticket): array
-    {
-        $createdAt = new DateTime($ticket->created_at);
-        $updateAt = new DateTime($ticket->updated_at);
-
-        if (0 === strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "requested"))
-        {
-            return
-                [
-                    $ticket->id,
-                    $ticket->subject,
-                    $this->manager->getUserById($ticket->assignee_id)->user->name,
-                    $createdAt->format('d/m/Y'),
-                    $updateAt->format('d/m/Y'),
-                    [
-                        "status" => $this->translateStatus($ticket->status),
-                        "data_status" => $ticket->status
-                    ],
-                    [
-                        'id' => $ticket->id,
-                    ]
-                ];
-        }
-
-        if (0 === strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "assigned"))
-        {
-            return
-                [
-                    $ticket->id,
-                    $ticket->subject,
-                    $this->manager->getUserById($ticket->requester_id)->user->name,
-                    $createdAt->format('d/m/Y'),
-                    $updateAt->format('d/m/Y'),
-                    [
-                        "status" => $this->translateStatus($ticket->status),
-                        "data_status" => $ticket->status
-                    ],
-                    [
-                        'id' => $ticket->id,
-                    ]
-                ];
-        }
-
-        return
-            [
-                $ticket->id,
-                $ticket->subject,
-                $this->manager->getUserById($ticket->requester_id)->user->name,
-                $this->manager->getUserById($ticket->assignee_id)->user->name,
-                $createdAt->format('d/m/Y'),
-                $updateAt->format('d/m/Y'),
-                [
-                    "status" => $this->translateStatus($ticket->status),
-                    "data_status" => $ticket->status
-                ],
-                [
-                    'id' => $ticket->id,
-                ]
-            ];
-    }
-
-    private function sortOrder(array $arrayTickets): array
-    {
-        $tickets = $this->formatTickets($arrayTickets);
-
-        $columnDefinition = $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']];
-        $sort = (string)$this->request->get('order')[0]['dir'] === 'asc' ? Criteria::ASC : Criteria::DESC;
-
-        if (!(int)$this->request->get('order')[0]['column'])
-        {
-            //order by update date desc + status asc
-            usort($tickets, function($a, $b) use ($columnDefinition)
-            {
-                $resDate = strcmp($a->updated_at, $b->updated_at);
-                $resStatus = strcmp($a->status, $b->status)*10;
-
-                return $resStatus - $resDate;
-            });
-
-            return $tickets;
-        }
-
-        if (strcmp($sort, "ASC"))
-        {
-            usort($tickets, function($a, $b) use ($columnDefinition)
-            {
-                $index = $columnDefinition["name"];
-                return -strcmp($a->$index, $b->$index);
-            });
-        }
-
-        if (strcmp($sort, "DESC"))
-        {
-            usort($tickets, function($a, $b) use ($columnDefinition)
-            {
-                $index = $columnDefinition["name"];
-                return strcmp($a->$index, $b->$index);
-            });
-        }
-
-        return $tickets;
-    }
-
-    private function formatTickets(array $tickets): array
-    {
-        $formatted_tickets = [];
-
-        foreach ($tickets as $ticketType)
-        {
-            foreach ($ticketType as $ticket)
-            {
-                $formatted_tickets[] = $ticket;
-            }
-        }
-
-        return $formatted_tickets;
-    }
-
-    private function translateStatus(string $status): ?string
-    {
-        if ($status === "new"){
-            return Translator::getInstance()->trans('new', [], ZenDesk::DOMAIN_NAME);
-        }
-        if ($status === "open"){
-            return Translator::getInstance()->trans('open', [], ZenDesk::DOMAIN_NAME);
-        }
-        if ($status === "pending"){
-            return Translator::getInstance()->trans('pending', [], ZenDesk::DOMAIN_NAME);
-        }
-        if ($status === "solved"){
-            return Translator::getInstance()->trans('solved', [], ZenDesk::DOMAIN_NAME);
-        }
-
-        return null;
     }
 
     public function getDefineColumnsDefinition($type): array
@@ -248,7 +106,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME)
             ];
 
-        if (0 !== strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "requested"))
+        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "assigned")
         {
             $definitions[] =
                 [
@@ -260,7 +118,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             ;
         }
 
-        if (0 !== strcmp(ZenDesk::getConfigValue("zen_desk_ticket_type"), "assigned"))
+        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "requested")
         {
             $definitions[] =
                 [
