@@ -2,7 +2,6 @@
 
 namespace ZenDesk\Controller;
 
-use EasyDataTableManager\EasyDataTableManager;
 use Exception;
 use Symfony\Component\HttpFoundation\RedirectResponse as RedirectResponse;
 use Symfony\Component\HttpFoundation\Response as Response;

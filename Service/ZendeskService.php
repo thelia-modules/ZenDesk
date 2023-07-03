@@ -4,7 +4,6 @@ namespace ZenDesk\Service;
 
 use DateTime;
 use Propel\Runtime\ActiveQuery\Criteria;
-use Symfony\Component\HttpFoundation\Request;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Translation\Translator;
 use ZenDesk\Utils\ZenDeskManager;
@@ -30,9 +29,10 @@ class ZendeskService
         $ticketsPending = [];
         $ticketsClosed = [];
 
-        $sort = $order['dir'] === 'asc' ? Criteria::ASC : Criteria::DESC;
+        $sort = $order['dir'];
 
-        if (!(int)$order['column'])
+        // order by UpdatedDate and status
+        if (!(int)$order['column'] && $sort == "")
         {
             foreach ($tickets as $ticket)
             {
@@ -66,9 +66,15 @@ class ZendeskService
             );
         }
 
-        $tickets = $this->sortByNameColumn($tickets, $columnDefinition, $sort);
+        $sort = $sort === 'asc' ? Criteria::ASC : Criteria::DESC;
 
-        return $tickets;
+        //order by ID
+        if (!(int)$order['column'])
+        {
+            return $this->sortById($tickets, $columnDefinition, $sort);
+        }
+
+        return $this->sortByNameColumn($tickets, $columnDefinition, $sort);
     }
 
     private function sortByUpdatedAt(array $tickets, array $columnDefinition): array
@@ -102,6 +108,30 @@ class ZendeskService
         return $tickets;
     }
 
+    private function sortById(array $tickets, array $columnDefinition, $sort): array
+    {
+        if ($sort === "ASC")
+        {
+            usort($tickets, function ($a, $b) use ($columnDefinition) {
+                $index = $columnDefinition["name"];
+                return $b->$index <=> $a->$index;
+            });
+        }
+
+        if ($sort === "DESC")
+        {
+            usort($tickets, function ($a, $b) use ($columnDefinition) {
+                $index = $columnDefinition["name"];
+                return $a->$index <=> $b->$index;
+            });
+        }
+
+        return $tickets;
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function jsonFormat(\stdClass $ticket): array
     {
         $createdAt = new DateTime($ticket->created_at);

@@ -2,7 +2,6 @@
 
 namespace ZenDesk\Controller;
 
-use EasyDataTableManager\EasyDataTableManager;
 use IntlDateFormatter;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -13,6 +12,9 @@ use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
 use Thelia\Tools\URL;
+use Zendesk\API\Exceptions\AuthException;
+use Zendesk\API\Exceptions\CustomException;
+use Zendesk\API\Exceptions\MissingParametersException;
 use ZenDesk\Form\ZenDeskTicketCommentsForm;
 use ZenDesk\Form\ZenDeskTicketForm;
 use ZenDesk\Utils\ZenDeskManager;
@@ -95,6 +97,10 @@ class FrontController extends BaseFrontController
         return $this->generateErrorRedirect($form);
     }
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
     #[Route('/tickets/{id}/comments', name: 'tickets_comments_get', methods: 'GET')]
     public function getCommentsByTicketsId(RequestStack $requestStack, ZenDeskManager $manager, $id): Response
     {
@@ -170,6 +176,10 @@ class FrontController extends BaseFrontController
         return $this->generateErrorRedirect($form);
     }
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
     #[Route('/tickets/{id}/status/{status}', name: 'tickets_status', methods: 'GET')]
     public function updateTicketStatus(
         ZenDeskManager $manager,
@@ -204,6 +214,9 @@ class FrontController extends BaseFrontController
      * @param ZenDeskManager $manager
      * @param array $attachments the files transmitted in form
      * @return array of the token uploaded file
+     * @throws AuthException
+     * @throws MissingParametersException
+     * @throws CustomException
      */
     private function uploadFileGetToken(
         ZenDeskManager $manager,

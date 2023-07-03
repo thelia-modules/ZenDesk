@@ -105,7 +105,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME)
             ];
 
-        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "assigned")
+        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "requested")
         {
             $definitions[] =
                 [
@@ -117,7 +117,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             ;
         }
 
-        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "requested")
+        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "assigned")
         {
             $definitions[] =
                 [

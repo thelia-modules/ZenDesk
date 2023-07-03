@@ -2,9 +2,7 @@
 
 namespace ZenDesk\Form;
 
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use ZenDesk\ZenDesk;

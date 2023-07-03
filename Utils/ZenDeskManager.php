@@ -2,14 +2,20 @@
 
 namespace ZenDesk\Utils;
 
+use Zendesk\API\Exceptions\ApiResponseException;
+use Zendesk\API\Exceptions\AuthException;
 use Zendesk\API\Exceptions\CustomException;
 use Zendesk\API\Exceptions\MissingParametersException;
+use Zendesk\API\Exceptions\ResponseException;
 use Zendesk\API\HttpClient;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use ZenDesk\ZenDesk;
 
 class ZenDeskManager
 {
+    /**
+     * @throws AuthException
+     */
     private function authZendeskAdmin(): ZendeskAPI
     {
         $client = new ZendeskAPI(ZenDesk::getConfigValue("zen_desk_api_subdomain"));
@@ -24,6 +30,10 @@ class ZenDeskManager
     }
 
 
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function getAllUsers()
     {
         $client = $this->authZendeskAdmin();
@@ -31,6 +41,10 @@ class ZenDeskManager
         return $client->users()->findAll()->users;
     }
 
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function getUserByEmail(string $mail, HttpClient $client = null): ?\stdClass
     {
         if ($client === null){
@@ -40,6 +54,10 @@ class ZenDeskManager
         return  $client->users()->search(array("query" => $mail));
     }
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
     public function getUserById(int $id, HttpClient $client = null): ?\stdClass
     {
         if ($client === null){
@@ -50,6 +68,10 @@ class ZenDeskManager
     }
 
 
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function getTicketsByUser(string $user): ?array
     {
         $tickets = [];
@@ -74,7 +96,11 @@ class ZenDeskManager
         return $tickets;
     }
 
-    private function getTicketsRequestedByUser(string $user,): ?array
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
+    private function getTicketsRequestedByUser(string $user): ?array
     {
         $client = $this->authZendeskAdmin();
 
@@ -88,6 +114,10 @@ class ZenDeskManager
         return null;
     }
 
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     private function getTicketsAssignedByUser(string $user): ?array
     {
         $client = $this->authZendeskAdmin();
@@ -103,6 +133,10 @@ class ZenDeskManager
     }
 
 
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function getSumTicketsByUser(string $user): int
     {
         $option = ZenDesk::getConfigValue("zen_desk_ticket_type");
@@ -123,6 +157,10 @@ class ZenDeskManager
             ;
     }
 
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function getSumTicketsRequestedByUser(string $user): int
     {
         $client = $this->authZendeskAdmin();
@@ -138,6 +176,10 @@ class ZenDeskManager
         return  0;
     }
 
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function getSumTicketsAssignedByUser(string $user): int
     {
         $client = $this->authZendeskAdmin();
@@ -154,6 +196,10 @@ class ZenDeskManager
     }
 
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
     public function getCommentTicket(int $id): array
     {
         $client = $this->authZendeskAdmin();
@@ -161,6 +207,10 @@ class ZenDeskManager
         return get_object_vars($client->tickets($id)->comments()->findAll());
     }
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
     public function getCommentAuthor($author_id): array
     {
         $client = $this->authZendeskAdmin();
@@ -169,6 +219,10 @@ class ZenDeskManager
     }
 
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
     public function getTicket($id): array
     {
         $client = $this->authZendeskAdmin();
@@ -176,6 +230,11 @@ class ZenDeskManager
         return get_object_vars($client->tickets($id)->find());
     }
 
+    /**
+     * @throws ApiResponseException
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function createTicket(array $params): void
     {
         $client = $this->authZendeskAdmin();
@@ -190,6 +249,7 @@ class ZenDeskManager
      * @param array $params
      * @param $id
      * @return void
+     * @throws AuthException
      */
     public function updateTicket(array $params, $id = null): void
     {
@@ -206,7 +266,7 @@ class ZenDeskManager
      * @param array $upload
      * @return \stdClass|null
      * @throws CustomException
-     * @throws MissingParametersException
+     * @throws MissingParametersException|AuthException
      */
     public function uploadFile(array $upload): ?\stdClass
     {
@@ -216,6 +276,10 @@ class ZenDeskManager
     }
 
 
+    /**
+     * @throws ApiResponseException
+     * @throws AuthException
+     */
     public function getAllGroup()
     {
         $client = $this->authZendeskAdmin();
@@ -223,6 +287,10 @@ class ZenDeskManager
         return $client->groups()->findAll()->groups;
     }
 
+    /**
+     * @throws ApiResponseException
+     * @throws AuthException
+     */
     public function getAllOrganization()
     {
         $client = $this->authZendeskAdmin();
@@ -230,6 +298,10 @@ class ZenDeskManager
         return $client->organizations()->findAll()->organizations;
     }
 
+    /**
+     * @throws ApiResponseException
+     * @throws AuthException
+     */
     public function getOrganizationId(string $organization) :?int
     {
         $organizations = $this->getAllOrganization();
