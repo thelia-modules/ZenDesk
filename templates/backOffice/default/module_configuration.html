@@ -23,6 +23,7 @@
                     <ul id="tabbed-menu" class="nav nav-tabs">
                         <li class="{if $tab eq "config"}active{/if}"><a data-toggle="tab" href="#config">{intl l="Configuration" d='zendesk.bo.default'}</a> </li>
                         <li class="{if $tab eq "users"}active{/if}"><a data-toggle="tab" href="#users">{intl l="List Zendesk Users" d='zendesk.bo.default'}</a> </li>
+                        <li class="{if $tab eq "parameters"}active{/if}"><a data-toggle="tab" href="#parameters">{intl l="Parameters" d='zendesk.bo.default'}</a> </li>
                     </ul>
 
                     <div class="tab-content">
@@ -95,6 +96,38 @@
                                 {/loop}
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div id="parameters" class="tab-pane {if $tab eq "parameters"}active{/if} form-container">
+                            <br>
+
+                            <div class="title">
+                                {intl l="Zen Desk Parameters" d='zendesk.bo.default'}
+                            </div>
+
+                            {form name="zendesk_form_parameters_form"}
+                                <form method="POST" action="{url path="/admin/module/ZenDesk/parameters"}" {form_enctype} >
+
+                                    {render_form_field field="success_url" value={url path='/admin/module/ZenDesk'}}
+                                    {render_form_field field="error_url" value={url path='/admin/module/ZenDesk'}}
+
+                                    {form_hidden_fields }
+
+                                    {if $form_error}
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="alert alert-danger">{$form_error_message}</div>
+                                            </div>
+                                        </div>
+                                    {/if}
+
+                                    <div class="col-md-6">
+                                        {render_form_field field='user_rules'}
+                                        {render_form_field field='ticket_type'}
+                                        <button type="submit" class="btn btn-success" >{intl l="Save Parameters" d="zendesk.bo.default"}</button>
+                                    </div>
+                                </form>
+                            {/form}
                         </div>
                     </div>
                 </div>

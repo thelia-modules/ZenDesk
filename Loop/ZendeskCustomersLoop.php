@@ -2,6 +2,7 @@
 
 namespace ZenDesk\Loop;
 
+use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Thelia\Core\Template\Element\BaseLoop;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
@@ -9,11 +10,13 @@ use Thelia\Core\Template\Element\PropelSearchLoopInterface;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
 use Thelia\Model\CustomerQuery;
+use Zendesk\API\Exceptions\AuthException;
+use Zendesk\API\Exceptions\ResponseException;
 use ZenDesk\Utils\ZenDeskManager;
 
 class ZendeskCustomersLoop extends BaseLoop implements PropelSearchLoopInterface
 {
-    public function parseResults(LoopResult $loopResult)
+    public function parseResults(LoopResult $loopResult): LoopResult
     {
         foreach ($loopResult->getResultDataCollection() as $customer) {
             // Create a new result
@@ -32,7 +35,11 @@ class ZendeskCustomersLoop extends BaseLoop implements PropelSearchLoopInterface
         return $loopResult;
     }
 
-    public function buildModelCriteria()
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
+    public function buildModelCriteria(): CustomerQuery|ModelCriteria
     {
         $manager = new ZenDeskManager();
         $zendeskUsers = $manager->getAllUsers();
@@ -48,7 +55,7 @@ class ZendeskCustomersLoop extends BaseLoop implements PropelSearchLoopInterface
         return $search;
     }
 
-    protected function getArgDefinitions()
+    protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
             Argument::createIntListTypeArgument('id')

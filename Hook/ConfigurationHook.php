@@ -17,7 +17,7 @@ class ConfigurationHook extends BaseHook
         ]));
     }
 
-    public static function getSubscribedHooks()
+    public static function getSubscribedHooks(): array
     {
         return [
             "module.configuration" => [

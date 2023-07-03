@@ -13,7 +13,15 @@
             renderCommentsFunction: function (data) {
                 if (data !== '') {
 
-                    return '<button class="w-full Button Button--primary" data-target-modal="' + data['id'] +'">{intl l='Open Ticket comments' d='zendesk.fo.default'}</button>'
+                    return '<button class="w-full Button Button--primary no-wrap" data-target-modal="' + data['id'] +'">{intl l='Open Ticket comments' d='zendesk.fo.default'}</button>'
+                }
+
+                return '<a href="#" style="line-height:50px;text-align:center;width: 50px; height: 50px;">Aucune</a>';
+            },
+
+            renderStatus: function (data) {
+                if (data !== '') {
+                    return '<div class="text-center zendesk-status zendesk-' + data['data_status'] + ' no-wrap" >'+ data['status'] +'</div>'
                 }
 
                 return '<a href="#" style="line-height:50px;text-align:center;width: 50px; height: 50px;">Aucune</a>';

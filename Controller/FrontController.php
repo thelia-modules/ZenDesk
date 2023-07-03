@@ -3,16 +3,20 @@
 namespace ZenDesk\Controller;
 
 use IntlDateFormatter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Thelia\Controller\Front\BaseFrontController;
-use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Core\Translation\Translator;
+use Thelia\Tools\URL;
+use Zendesk\API\Exceptions\AuthException;
+use Zendesk\API\Exceptions\CustomException;
+use Zendesk\API\Exceptions\MissingParametersException;
 use ZenDesk\Form\ZenDeskTicketCommentsForm;
 use ZenDesk\Form\ZenDeskTicketForm;
-use ZenDesk\Service\RetailerTicketsService;
 use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
 
@@ -23,9 +27,9 @@ class FrontController extends BaseFrontController
     public function createNewTickets(
         SecurityContext $securityContext,
         ZenDeskManager $manager,
-        RetailerTicketsService $service,
         ParserContext $parserContext
-    ) {
+    ): Response|null
+    {
         $form = $this->createForm(ZenDeskTicketForm::getName());
 
         try {
@@ -50,7 +54,7 @@ class FrontController extends BaseFrontController
                 ));
             }
 
-            $organization_id = $service->getOrganizationId($manager, $data["organization"]);
+            $organization_id = $manager->getOrganizationId($data["organization"]);
 
             if (!$organization_id){
                 throw new \Exception(Translator::getInstance()->trans(
@@ -93,6 +97,10 @@ class FrontController extends BaseFrontController
         return $this->generateErrorRedirect($form);
     }
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
     #[Route('/tickets/{id}/comments', name: 'tickets_comments_get', methods: 'GET')]
     public function getCommentsByTicketsId(RequestStack $requestStack, ZenDeskManager $manager, $id): Response
     {
@@ -125,7 +133,9 @@ class FrontController extends BaseFrontController
         return $this->render("comments", [
             "comments" => $formattedComment,
             "ticketId" => $id,
-            "ticketName" => $ticketName
+            "ticketName" => $ticketName,
+            "status" => $ticket["ticket"]->status,
+            "zendesk_rules" => (bool)ZenDesk::getConfigValue("zen_desk_user_rules")
          ]);
     }
 
@@ -135,7 +145,7 @@ class FrontController extends BaseFrontController
         ZenDeskManager $manager,
         ParserContext $parserContext,
         $id
-    ) {
+    ): RedirectResponse|Response|null {
         $form = $this->createForm(ZenDeskTicketCommentsForm::getName());
 
         try {
@@ -151,7 +161,7 @@ class FrontController extends BaseFrontController
                 ]
             ];
 
-            $manager->createComment($params, $id);
+            $manager->updateTicket($params, $id);
 
             return $this->generateSuccessRedirect($form);
         } catch (\Exception $e) {
@@ -166,6 +176,37 @@ class FrontController extends BaseFrontController
         return $this->generateErrorRedirect($form);
     }
 
+    /**
+     * @throws MissingParametersException
+     * @throws AuthException
+     */
+    #[Route('/tickets/{id}/status/{status}', name: 'tickets_status', methods: 'GET')]
+    public function updateTicketStatus(
+        ZenDeskManager $manager,
+        int $id,
+        string $status
+    ): RedirectResponse|Response
+    {
+        if ($ticket = $manager->getTicket($id))
+        {
+            if ($ticket["ticket"]->status !== "closed")
+            {
+                if (
+                    $status ==="open" ||
+                    $status === "pending" ||
+                    $status ==="solved"
+                ) {
+                    $params = [
+                        "status" => $status,
+                    ];
+
+                    $manager->updateTicket($params, $id);
+                }
+            }
+        }
+
+        return $this->generateRedirect(URL::getInstance()->absoluteUrl('/account'));
+    }
 
     /**
      * Upload Files in Zendesk and get their token
@@ -173,6 +214,9 @@ class FrontController extends BaseFrontController
      * @param ZenDeskManager $manager
      * @param array $attachments the files transmitted in form
      * @return array of the token uploaded file
+     * @throws AuthException
+     * @throws MissingParametersException
+     * @throws CustomException
      */
     private function uploadFileGetToken(
         ZenDeskManager $manager,

@@ -19,12 +19,12 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     protected $request;
 
     public function __construct(
-        protected ZenDeskManager           $manager,
-        protected RetailerTicketsService   $service,
-        protected SecurityContext          $securityContext,
-        RequestStack             $requestStack,
-        EventDispatcherInterface $dispatcher,
-        ParserInterface          $parser,
+        protected ZenDeskManager    $manager,
+        protected SecurityContext   $securityContext,
+        protected ZendeskService    $service,
+        RequestStack                $requestStack,
+        EventDispatcherInterface    $dispatcher,
+        ParserInterface             $parser,
     )
     {
         parent::__construct($requestStack, $dispatcher, $parser);
@@ -32,57 +32,52 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     }
 
     /**
-     * @return bool true if retailer has tickets
+     * @throws \Exception
      */
-    public function hasTickets(): bool
-    {
-        return 0 < $this->manager->getTicketsUser(
-                $this->securityContext->getCustomerUser()->getEmail(),
-            );
-    }
-
     public function buildResponseData($type): Response
     {
-        $zenDeskUrl = "https://" . ZenDesk::getConfigValue("zen_desk_api_subdomain") . ".zendesk.com/agent/tickets/";
+        $tickets = $this->manager->getTicketsByUser($this->securityContext->getCustomerUser()->getEmail());
 
-        $tickets = $this->manager->getTicketsUser(
-            $this->securityContext->getCustomerUser()->getEmail(),
+        $sumTickets = $this->manager->getSumTicketsByUser(
+            $this->securityContext->getCustomerUser()->getEmail()
         );
 
         $json = [];
 
         if ($tickets !== null) {
-            $formatedTickets = $this->service->formatRetailerTickets($tickets);
+            $sortedTickets = $this->service->sortOrder(
+                $this->request->get('order')[0],
+                $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']],
+                $tickets
+            );
 
             $json = [
                 "draw" => (int)$this->request->get('draw'),
-                "recordsTotal" => count($tickets["requests"]),
-                "recordsFiltered" => count($tickets["requests"]),
+                "recordsTotal" => $sumTickets,
+                "recordsFiltered" => $sumTickets,
                 "data" => [],
+                "tickets" => count($tickets)
             ];
-
-            foreach ($formatedTickets as $formatedTicket) {
-                $json['data'][] = [
-                    $formatedTicket["id"],
-                    $formatedTicket["subject"],
-                    $formatedTicket["createdAt"],
-                    $formatedTicket["updateAt"],
-                    $formatedTicket["status"],
-                    [
-                        'id' => $formatedTicket["id"],
-                    ],
-                ];
+            foreach ($sortedTickets as $ticket)
+            {
+                $json['data'][] = $this->service->jsonFormat($ticket);
             }
         }
 
         return new JsonResponse($json);
     }
 
+    /**
+     * @throws \SmartyException
+     */
     public function getFiltersTemplate($params = []): string
     {
         return $this->parser->render('datatable/render/zendesk.render.datatable.tickets.js.html', []);
     }
 
+    /**
+     * @throws \SmartyException
+     */
     public function getRendersTemplate($params = []): string
     {
         return $this->parser->render('datatable/render/zendesk.render.datatable.tickets.js.html', []);
@@ -92,45 +87,81 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     {
         $i = -1;
 
-        $definitions = [
+        $definitions = [];
+
+        $definitions[] =
             [
                 'name' => 'id',
                 'targets' => ++$i,
-                'className' => "text-center",
-                'title' => Translator::getInstance()->trans('ID', [], ZenDesk::DOMAIN_NAME),
-            ],
+                'className' => "text-center id",
+                'title' => Translator::getInstance()->trans('ID', [], ZenDesk::DOMAIN_NAME)
+            ];
+
+        $definitions[] =
             [
                 'name' => 'subject',
                 'targets' => ++$i,
-                'className' => "text-center",
-                'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME),
-            ],
+                'className' => "text-center subject",
+                'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME)
+            ];
+
+        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "requested")
+        {
+            $definitions[] =
+                [
+                    'name' => 'requester_id',
+                    'targets' => ++$i,
+                    'className' => "text-center",
+                    'title' => Translator::getInstance()->trans('Requester', [], ZenDesk::DOMAIN_NAME),
+                ]
+            ;
+        }
+
+        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "assigned")
+        {
+            $definitions[] =
+                [
+                    'name' => 'assignee_id',
+                    'targets' => ++$i,
+                    'className' => "text-center",
+                    'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME)
+                ]
+            ;
+        }
+
+        $definitions[] =
             [
                 'name' => 'created_at',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center createdat",
                 'title' => Translator::getInstance()->trans('Created At', [], ZenDesk::DOMAIN_NAME),
-            ],
+            ];
+
+        $definitions[] =
             [
-                'name' => 'update_at',
+                'name' => 'updated_at',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center updatedat",
                 'title' => Translator::getInstance()->trans('Update At', [], ZenDesk::DOMAIN_NAME),
-            ],
+            ];
+
+        $definitions[] =
             [
                 'name' => 'status',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center status",
+                'render' => "renderStatus",
                 'title' => Translator::getInstance()->trans('Status', [], ZenDesk::DOMAIN_NAME),
-            ],
+            ];
+
+        $definitions[] =
             [
                 'name' => 'comments',
                 'targets' => ++$i,
-                'className' => "text-center",
+                'className' => "text-center comments",
                 'render' => "renderCommentsFunction",
                 'title' => Translator::getInstance()->trans('Actions', [], ZenDesk::DOMAIN_NAME),
-            ],
-        ];
+            ];
 
         return $definitions;
     }
