@@ -19,7 +19,7 @@ composer require thelia/zend-desk-module:~1.0
 
 ## Usage
 
-First go to https://{sous-domaine}.zendesk.com/admin/apps-integrations/apis/zendesk-api/
+First go to https://`{sous-domaine}`.zendesk.com/admin/apps-integrations/apis/zendesk-api/
 
 ![AdminZenDeskAPI](docs/images/admin_zendesk_api.png)
 
@@ -32,12 +32,21 @@ Go to the configuration panel and add your subdomain, api token and Zendesk's us
 
 ![ZenDeskConfig](docs/images/zendesk_config.png)
 
-When Connected, your retailers will see their tickets from ZenDesk.
+When Connected, your customer will see their tickets from ZenDesk.
 
 It's using the email of the retailer so be sure to add it in ZenDesk.
+
+![ZenDeskConfig](docs/images/zendesk_parameters.png)
+
+You should configure Zendesk Parameters
+
+* user rules : allow your users to create and edit tickets or not (read-only  by default)
+* tickets type : allow your users to see only requested or assigned ticket or all (assigned by default)
 
 ## Loop
 
 [zendesk_users_loop]
 
 ![ZenDeskUser](docs/images/zendesk_users_list.png)
+
+You will see all the users who have both a Zendesk account and an account on your website

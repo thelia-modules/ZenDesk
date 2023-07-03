@@ -145,7 +145,8 @@ class FrontController extends BaseFrontController
         ZenDeskManager $manager,
         ParserContext $parserContext,
         $id
-    ): RedirectResponse|Response|null {
+    ): RedirectResponse|Response|null
+    {
         $form = $this->createForm(ZenDeskTicketCommentsForm::getName());
 
         try {

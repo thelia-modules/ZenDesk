@@ -26,6 +26,12 @@ class ZenDesk extends BaseModule
             ->autoconfigure(true);
     }
 
+    public function postActivation(ConnectionInterface $con = null): void
+    {
+        self::setConfigValue('zen_desk_user_rules', 'false');
+        self::setConfigValue('zen_desk_ticket_type', 'assigned');
+    }
+
     /**
      * Execute sql files in Config/update/ folder named with module version (ex: 1.0.1.sql).
      *
