@@ -11,7 +11,7 @@ return array(
     'Parameters' => 'Parametres',
     'Role' => 'Rôle',
     'Save Configuration' => 'Enregistrer la configuration',
-    'Save Parameters' => 'Enregistrer les Paramètres',
+    'Save Parameters' => 'Enregistrer les paramètres',
     'Update_At' => 'Date de modification',
     'Zen Desk Parameters' => 'Parametres Zendesk',
     'Zen Desk Users' => 'Utilisateurs de Zendesk',
