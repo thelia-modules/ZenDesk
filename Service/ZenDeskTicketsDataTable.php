@@ -3,7 +3,6 @@
 namespace ZenDesk\Service;
 
 use EasyDataTableManager\Service\DataTable\BaseDataTable;
-use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;

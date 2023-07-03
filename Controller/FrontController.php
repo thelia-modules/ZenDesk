@@ -177,18 +177,21 @@ class FrontController extends BaseFrontController
         string $status
     ): RedirectResponse|Response
     {
-        if ($manager->getTicket($id)){
+        if ($ticket = $manager->getTicket($id))
+        {
+            if ($ticket["ticket"]->status !== "closed")
+            {
+                if (
+                    $status ==="open" ||
+                    $status === "pending" ||
+                    $status ==="solved"
+                ) {
+                    $params = [
+                        "status" => $status,
+                    ];
 
-            if (
-                $status ==="open" ||
-                $status === "pending" ||
-                $status ==="solved"
-            ) {
-                $params = [
-                    "status" => $status,
-                ];
-
-                $manager->updateTicket($params, $id);
+                    $manager->updateTicket($params, $id);
+                }
             }
         }
 
