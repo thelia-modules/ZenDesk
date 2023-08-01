@@ -1,36 +1,135 @@
+{if isset($smarty.get.tab)}
+    {$tab=$smarty.get.tab}
+{else}
+    {$tab='users'}
+{/if}
+{if isset($smarty.get.lang)}
+    {$locale=$smarty.get.lang}
+{else}
+    {$locale="fr_FR"}
+{/if}
+<style>
+    input[type=number]
+    {
+        min-width:100px;
+    }
+</style>
+
 <div class="row">
     <div class="col-md-12">
         <div class="general-block-decorator">
             <div class="row">
-                <div class="col-md-12 form-container">
-                    <div class="title">
-                        {intl l="Zen Desk configuration" d='zen.desk.bo.default'}
-                    </div>
+                <div class="col-md-12">
+                    <ul id="tabbed-menu" class="nav nav-tabs">
+                        <li class="{if $tab eq "config"}active{/if}"><a data-toggle="tab" href="#config">{intl l="Configuration" d='zendesk.bo.default'}</a> </li>
+                        <li class="{if $tab eq "users"}active{/if}"><a data-toggle="tab" href="#users">{intl l="List Zendesk Users" d='zendesk.bo.default'}</a> </li>
+                        <li class="{if $tab eq "parameters"}active{/if}"><a data-toggle="tab" href="#parameters">{intl l="Parameters" d='zendesk.bo.default'}</a> </li>
+                    </ul>
 
-                    {form name="zen_desk_config_form"}
-                        <form method="POST" action="{url path="/admin/module/ZenDesk/configuration"}" {form_enctype} >
+                    <div class="tab-content">
+                        <div id="config" class="tab-pane {if $tab eq "config"}active{/if} form-container">
+                            <br>
 
-                            {render_form_field field="success_url" value={url path='/admin/module/ZendDesk'}}
-                            {render_form_field field="error_url" value={url path='/admin/module/ZendDesk'}}
+                        <div class="title">
+                            {intl l="Zen Desk configuration" d='zendesk.bo.default'}
+                        </div>
 
-                            {form_hidden_fields }
+                        {form name="zendesk_form_configuration_form"}
+                            <form method="POST" action="{url path="/admin/module/ZenDesk/configuration"}" {form_enctype} >
 
-                            {if $form_error}
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="alert alert-danger">{$form_error_message}</div>
+                                {render_form_field field="success_url" value={url path='/admin/module/ZenDesk'}}
+                                {render_form_field field="error_url" value={url path='/admin/module/ZenDesk'}}
+
+                                {form_hidden_fields }
+
+                                {if $form_error}
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="alert alert-danger">{$form_error_message}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            {/if}
+                                {/if}
 
-                            <div class="col-md-6">
-                                {render_form_field field='api_subdomain'}
-                                {render_form_field field='api_token'}
-                                {render_form_field field='api_username'}
-                                <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="zen.desk.bo.default"}</button>
+                                <div class="col-md-6">
+                                    {render_form_field field='api_subdomain'}
+                                    {render_form_field field='api_token'}
+                                    {render_form_field field='api_username'}
+                                    <button type="submit" class="btn btn-success" >{intl l="Save Configuration" d="zendesk.bo.default"}</button>
+                                </div>
+                            </form>
+                        {/form}
+                        </div>
+
+                        <div id="users" class="tab-pane {if $tab eq "users"}active{/if} form-container">
+                            <br>
+
+                            <div class="title">
+                                {intl l="Zen Desk Users" d='zendesk.bo.default'}
                             </div>
-                        </form>
-                    {/form}
+
+                            <table class="table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th>{intl l='Id' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Name' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Email' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Role' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Locale' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Created_At' d='zendesk.bo.default'}</th>
+                                    <th>{intl l='Update_At' d='zendesk.bo.default'}</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                {loop type="zendesk_customers_loop" name="zendesk_customers"}
+                                {loop type="zendesk_users_loop" name="zendesk_user" email=$EMAIL locale=$locale}
+                                    <tr>
+                                        <td><a href="/admin/customer/update?customer_id={$ID}">{$ID}</td>
+                                        <td>{$NAME}</td>
+                                        <td>{$EMAIL}</td>
+                                        <td>{$ROLE}</td>
+                                        <td>{$LOCALE}</td>
+                                        <td>{$CREATED_AT}</td>
+                                        <td>{$UPDATE_AT}</td>
+                                    </tr>
+                                {/loop}
+                                {/loop}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="parameters" class="tab-pane {if $tab eq "parameters"}active{/if} form-container">
+                            <br>
+
+                            <div class="title">
+                                {intl l="Zen Desk Parameters" d='zendesk.bo.default'}
+                            </div>
+
+                            {form name="zendesk_form_parameters_form"}
+                                <form method="POST" action="{url path="/admin/module/ZenDesk/parameters"}" {form_enctype} >
+
+                                    {render_form_field field="success_url" value={url path='/admin/module/ZenDesk'}}
+                                    {render_form_field field="error_url" value={url path='/admin/module/ZenDesk'}}
+
+                                    {form_hidden_fields }
+
+                                    {if $form_error}
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="alert alert-danger">{$form_error_message}</div>
+                                            </div>
+                                        </div>
+                                    {/if}
+
+                                    <div class="col-md-6">
+                                        {render_form_field field='user_rules'}
+                                        {render_form_field field='ticket_type'}
+                                        <button type="submit" class="btn btn-success" >{intl l="Save Parameters" d="zendesk.bo.default"}</button>
+                                    </div>
+                                </form>
+                            {/form}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

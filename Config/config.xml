@@ -4,13 +4,14 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
 
-    <forms>
-        <form name="zen_desk_config_form" class="ZendDesk\Form\ConfigurationForm" />
-    </forms>
-
     <hooks>
-        <hook id="zen.desk.hook" class="ZendDesk\Hook\ConfigurationHook">
-            <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfiguration" />
+        <hook id="zendesk.database.render.front.tools.hook" class="ZenDesk\Hook\ZendeskDataTableFrontHook">
+            <tag name="hook.event_listener" event="front.easydatatablemanager.js" type="front" method="renderDataTableTools" />
         </hook>
     </hooks>
+
+    <loops>
+        <loop class="zendesk_users_loop" name="ZenDesk/Loop/ZendeskUsersLoop"/>
+        <loop class="zendesk_customers_loop" name="ZenDesk/Loop/ZendeskCustomersLoop"/>
+    </loops>
 </config>

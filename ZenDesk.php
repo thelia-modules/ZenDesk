@@ -1,6 +1,6 @@
 <?php
 
-namespace ZendDesk;
+namespace ZenDesk;
 
 use Propel\Runtime\Connection\ConnectionInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
@@ -8,10 +8,10 @@ use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
 use Thelia\Module\BaseModule;
 
-class ZendDesk extends BaseModule
+class ZenDesk extends BaseModule
 {
     /** @var string */
-    const DOMAIN_NAME = 'zenddesk';
+    const DOMAIN_NAME = 'zendesk';
 
     /**
      * Defines how services are loaded in your modules
@@ -24,6 +24,12 @@ class ZendDesk extends BaseModule
             ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
             ->autowire(true)
             ->autoconfigure(true);
+    }
+
+    public function postActivation(ConnectionInterface $con = null): void
+    {
+        self::setConfigValue('zen_desk_user_rules', 'false');
+        self::setConfigValue('zen_desk_ticket_type', 'assigned');
     }
 
     /**

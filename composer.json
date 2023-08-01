@@ -1,6 +1,6 @@
 {
-  "name": "thelia/zend-desk-module",
-  "description": "ZendDesk module for Thelia",
+  "name": "thelia/zendesk-module",
+  "description": "ZenDesk module for Thelia",
   "license": "LGPL-3.0-or-later",
   "type": "thelia-module",
   "require": {
@@ -8,6 +8,6 @@
     "zendesk/zendesk_api_client_php": "^2.2"
   },
   "extra": {
-    "installer-name": "ZendDesk"
+    "installer-name": "ZenDesk"
   }
 }

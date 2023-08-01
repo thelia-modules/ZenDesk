@@ -1,20 +1,31 @@
 <?php
 
-namespace ZendDesk\Hook;
+namespace ZenDesk\Hook;
 
-use HookAdminHome\Hook\AdminHook;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
-use ZendDesk\ZendDesk;
+use ZenDesk\ZenDesk;
 
-class ConfigurationHook extends AdminHook
+class ConfigurationHook extends BaseHook
 {
     public function onModuleConfiguration(HookRenderEvent $event)
     {
         $event->add($this->render("module_configuration.html", [
-            'url' => ZendDesk::getConfigValue('zen_desk_api_subdomain'),
-            'key' => ZendDesk::getConfigValue('zen_desk_api_username'),
-            'login' => ZendDesk::getConfigValue('zen_desk_api_token'),
+            'url' => ZenDesk::getConfigValue('zen_desk_api_subdomain'),
+            'key' => ZenDesk::getConfigValue('zen_desk_api_username'),
+            'login' => ZenDesk::getConfigValue('zen_desk_api_token'),
         ]));
+    }
+
+    public static function getSubscribedHooks(): array
+    {
+        return [
+            "module.configuration" => [
+                [
+                    "type" => "back",
+                    "method" => "onModuleConfiguration"
+                ],
+            ]
+        ];
     }
 }

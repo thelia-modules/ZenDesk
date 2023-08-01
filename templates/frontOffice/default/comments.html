@@ -1,0 +1,96 @@
+{block name="after-admin-css"}
+    {include file="css/comments.css.html"}
+{/block}
+
+<!-- Show Tickets information in modal-->
+<div id="Modal-infos" class="Modal_infos">
+    {if $ticketId}
+        <div class="Headline Headline--2 mb-6 font-bold text-main text-center">#{$ticketId} - {$ticketName}</div>
+    {/if}
+    <div class="text-center mb-2">
+        <a class="Button Button--primary" href="#{count($comments)}">{intl l="show last message" d='zendesk.fo.default'}</a>
+    </div>
+    <hr>
+    {if $status != "closed"}
+        <div class="text-center m-2">
+            <a class="Button Button--{if $status == "open"}secondary{else}primary{/if}" href="{if $status == "open"}#{else}{url path="/zendesk/tickets/$ticketId/status/open"}{/if}">{intl l="Open" d='zendesk.fo.default'}</a>
+            <a class="Button Button--{if $status == "pending"}secondary{else}primary{/if}" href="{if $status == "pending"}#{else}{url path="/zendesk/tickets/$ticketId/status/pending"}{/if}">{intl l="Pending" d='zendesk.fo.default'}</a>
+            <a class="Button Button--{if $status == "solved"}secondary{else}primary{/if}" href="{if $status == "solved"}#{else}{url path="/zendesk/tickets/$ticketId/status/solved"}{/if}">{intl l="Solved" d='zendesk.fo.default'}</a>
+        </div>
+        <hr>
+    {/if}
+    <div>
+        {foreach from=$comments item=comment key=k}
+            <div id="{$k+1}" class="mt-6">
+                <div class="comment">
+                    <div class="comment-author-picture">
+                        {if $comment.author_picture_url}
+                        <img class="img-rounded" src="{$comment.author_picture_url}" alt="author-picture">
+                        {else}
+                            <img class="img-rounded" src="#" alt="default-author-picture">
+                        {/if}
+                    </div>
+                    <div class="comment-info">
+                        <strong class="text-main comment-author-name">{$comment.author_name}</strong>
+                        - {$comment.created_at_str}
+                        <span> - {$comment.created_at}</span>
+                    </div>
+                    <div class="comment-author-email">
+                        {$comment.author_email}
+                    </div>
+                </div>
+            </div>
+            <div id="Modal-comment" class="text-main m-2 border border-main p-4">
+                {$comment.body nofilter}
+
+                {if isset($comment.attachments)}
+                    <div class="text-gray">
+                        {foreach from=$comment.attachments item=attachment}
+                            <a href="{$attachment.content_url}" target="_blank">{$attachment.file_name}</a>
+                        {/foreach}
+                    </div>
+                {/if}
+            </div>
+        {/foreach}
+    </div>
+    <div class="text-center">
+        <a class="Button Button--primary" href="#Modal-infos">{intl l="back to top" d='zendesk.fo.default'}</a>
+    </div>
+
+    {if $zendesk_rules}
+    <br><hr><br>
+    <div class="text-center">
+        <div class="text-main font-bold text-lg">{intl l="ADD A COMMENT" d='zendesk.fo.default'}</div>
+
+        {form name="zendesk_form_zen_desk_ticket_comments_form"}
+        <form class="form" method="post" action="{url path="/zendesk/tickets/$ticketId/comments"}" {form_enctype form=$form}>
+            {form_hidden_fields form=$form}
+            {form_field field="success_url"}
+                <input type="hidden" name="{$name}" value="{url path='/account'}">
+            {/form_field}
+            {form_field field="error_url"}
+                <input type="hidden" name="{$name}" value="{url path='/account'}">
+            {/form_field}
+
+            {form_field form=$form field="comment_reply"}
+                <label>
+                    <div>
+                        <textarea name="{$name}" class="Input-field" {if $required} aria-required="true" required{/if} rows="5"></textarea>
+                    </div>
+                </label>
+            {/form_field}
+
+            {form_field form=$form field="attachments"}
+                <label>
+                <input type="file" class="Input-field" name="{$name}" value="{$value}" {$attr} />
+                </label>
+            {/form_field}
+
+            <div class="text-center">
+                <button type="submit" class="Button Button--primary m-2">{intl l="Reply" d='zendesk.fo.default'}</button>
+            </div>
+        </form>
+        {/form}
+    </div>
+    {/if}
+</div>
