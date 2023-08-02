@@ -9,10 +9,12 @@ use Thelia\Core\Template\Element\LoopResultRow;
 use Thelia\Core\Template\Element\PropelSearchLoopInterface;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Template\Loop\Argument\ArgumentCollection;
+use Thelia\Log\Tlog;
 use Thelia\Model\CustomerQuery;
 use Zendesk\API\Exceptions\AuthException;
 use Zendesk\API\Exceptions\ResponseException;
 use ZenDesk\Utils\ZenDeskManager;
+use ZenDesk\ZenDesk;
 
 class ZendeskCustomersLoop extends BaseLoop implements PropelSearchLoopInterface
 {
@@ -39,20 +41,28 @@ class ZendeskCustomersLoop extends BaseLoop implements PropelSearchLoopInterface
      * @throws ResponseException
      * @throws AuthException
      */
-    public function buildModelCriteria(): CustomerQuery|ModelCriteria
+    public function buildModelCriteria(): CustomerQuery|null
     {
-        $manager = new ZenDeskManager();
-        $zendeskUsers = $manager->getAllUsers();
-
-        $search = CustomerQuery::create();
-
-        foreach ($zendeskUsers as $user)
+        try
         {
-            $search->filterByEmail($user->email);
-            $search->_or();
+            $manager = new ZenDeskManager();
+            $zendeskUsers = $manager->getAllUsers();
+
+            $search = CustomerQuery::create();
+
+            foreach ($zendeskUsers as $user)
+            {
+                $search->filterByEmail($user->email);
+                $search->_or();
+            }
+
+            return $search;
+        } catch (\Exception $ex)
+        {
+            Tlog::getInstance()->error($ex->getMessage());
         }
 
-        return $search;
+        return null;
     }
 
     protected function getArgDefinitions(): ArgumentCollection

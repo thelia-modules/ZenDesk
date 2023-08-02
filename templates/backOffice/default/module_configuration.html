@@ -84,7 +84,7 @@
                                 {loop type="zendesk_customers_loop" name="zendesk_customers"}
                                 {loop type="zendesk_users_loop" name="zendesk_user" email=$EMAIL locale=$locale}
                                     <tr>
-                                        <td><a href="/admin/customer/update?customer_id={$ID}">{$ID}</td>
+                                        <td><a href={url path='/admin/customer/update?customer_id='}{$ID}>{$ID}</td>
                                         <td>{$NAME}</td>
                                         <td>{$EMAIL}</td>
                                         <td>{$ROLE}</td>

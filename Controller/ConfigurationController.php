@@ -11,15 +11,11 @@ use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
 use ZenDesk\Form\ConfigurationForm;
 use ZenDesk\Form\ParametersForm;
-use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
 
 #[Route('/admin/module/ZenDesk', name: 'zendesk_config')]
 class ConfigurationController extends AdminController
 {
-    public function __construct(protected ZenDeskManager $manager) {
-    }
-
     #[Route('/configuration', name: 'configuration')]
     public function saveConfiguration(ParserContext $parserContext) : RedirectResponse|Response
     {
