@@ -12,6 +12,5 @@
 
     <loops>
         <loop class="zendesk_users_loop" name="ZenDesk/Loop/ZendeskUsersLoop"/>
-        <loop class="zendesk_customers_loop" name="ZenDesk/Loop/ZendeskCustomersLoop"/>
     </loops>
 </config>

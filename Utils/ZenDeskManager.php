@@ -34,11 +34,20 @@ class ZenDeskManager
      * @throws ResponseException
      * @throws AuthException
      */
-    public function getAllUsers()
+    public function getAllUsers(): array
     {
         $client = $this->authZendeskAdmin();
 
-        return $client->users()->findAll()->users;
+        $page = 1;
+        $allUsers = [];
+
+        while ([] !== $users = $client->users()->findAll(['per_page' => 100, 'page' => $page, 'sort_order' => "desc"])->users)
+        {
+            $allUsers[] = $users;
+            $page += 1;
+        }
+
+        return $allUsers;
     }
 
     /**

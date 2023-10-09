@@ -81,8 +81,7 @@
                                 </thead>
 
                                 <tbody>
-                                {loop type="zendesk_customers_loop" name="zendesk_customers"}
-                                {loop type="zendesk_users_loop" name="zendesk_user" email=$EMAIL locale=$locale}
+                                {loop type="zendesk_users_loop" name="zendesk_user" locale=$locale}
                                     <tr>
                                         <td><a href={url path='/admin/customer/update?customer_id='}{$ID}>{$ID}</td>
                                         <td>{$NAME}</td>
@@ -92,7 +91,6 @@
                                         <td>{$CREATED_AT}</td>
                                         <td>{$UPDATE_AT}</td>
                                     </tr>
-                                {/loop}
                                 {/loop}
                                 </tbody>
                             </table>
