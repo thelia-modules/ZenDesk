@@ -54,6 +54,28 @@ class ParametersForm extends BaseForm
                     'data' => ZenDesk::getConfigValue('zen_desk_ticket_type')
                 ]
             )
+            ->add(
+                'column_hide',
+                ChoiceType::class,
+                [
+                    'choices'  => [
+                        Translator::getInstance()->trans("Hide assigned column", [], ZenDesk::DOMAIN_NAME) => "assigned hide",
+                        Translator::getInstance()->trans("Hide requested column", [], ZenDesk::DOMAIN_NAME) => "requested hide",
+                        Translator::getInstance()->trans("Hide nothing", [], ZenDesk::DOMAIN_NAME) => "nothing hide"
+                    ],
+                    'label' => Translator::getInstance()->trans("Hidden column", [], ZenDesk::DOMAIN_NAME),
+                    'required'   => true,
+                    'label_attr' => [
+                        'for' => 'ticket_type',
+                        'help' => Translator::getInstance()->trans(
+                            "hide a column (only work with ticket type : all)",
+                            [],
+                            ZenDesk::DOMAIN_NAME
+                        )
+                    ],
+                    'data' => ZenDesk::getConfigValue('zen_desk_hide_column')
+                ]
+            )
         ;
     }
 }

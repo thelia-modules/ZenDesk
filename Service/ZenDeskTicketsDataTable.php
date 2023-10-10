@@ -87,6 +87,9 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     {
         $i = -1;
 
+        $ticketType = ZenDesk::getConfigValue("zen_desk_ticket_type");
+        $hiddenColumn = ZenDesk::getConfigValue("zen_desk_hide_column");
+
         $definitions = [];
 
         $definitions[] =
@@ -105,7 +108,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME)
             ];
 
-        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "requested")
+        if ($ticketType === "assigned" || $ticketType === "all" && $hiddenColumn !== "requested hide")
         {
             $definitions[] =
                 [
@@ -117,7 +120,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
             ;
         }
 
-        if (ZenDesk::getConfigValue("zen_desk_ticket_type") !== "assigned")
+        if ($ticketType === "requested" || $ticketType === "all" && $hiddenColumn !== "assigned hide")
         {
             $definitions[] =
                 [

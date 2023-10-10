@@ -137,7 +137,10 @@ class ZendeskService
         $createdAt = new DateTime($ticket->created_at);
         $updateAt = new DateTime($ticket->updated_at);
 
-        if (ZenDesk::getConfigValue("zen_desk_ticket_type") === "requested")
+        $ticketType = ZenDesk::getConfigValue("zen_desk_ticket_type");
+        $hiddenColumn = ZenDesk::getConfigValue("zen_desk_hide_column");
+
+        if ($ticketType === "requested" || $ticketType === "all" && $hiddenColumn === "requested hide")
         {
             return
                 [
@@ -156,7 +159,7 @@ class ZendeskService
                 ];
         }
 
-        if (ZenDesk::getConfigValue("zen_desk_ticket_type") === "assigned")
+        if ($ticketType === "assigned" || $ticketType === "all" && $hiddenColumn === "assigned hide")
         {
             return
                 [
