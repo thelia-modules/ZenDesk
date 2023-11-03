@@ -2,6 +2,7 @@
 
 namespace ZenDesk\Loop;
 
+use Exception;
 use IntlDateFormatter;
 use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
@@ -41,7 +42,9 @@ class ZendeskUsersLoop extends BaseLoop implements ArraySearchLoopInterface
         $items = [];
 
         $manager = new ZenDeskManager();
-        $zendeskUsers = $manager->getAllUsers();
+        try {
+            $zendeskUsers = $manager->getAllUsers();
+
 
         foreach ($zendeskUsers as $usersArray)
         {
@@ -63,6 +66,10 @@ class ZendeskUsersLoop extends BaseLoop implements ArraySearchLoopInterface
         }
 
         sort($items);
+
+        } catch (Exception) {
+            return [];
+        }
 
         return $items;
     }
@@ -90,7 +97,7 @@ class ZendeskUsersLoop extends BaseLoop implements ArraySearchLoopInterface
         return $fmt->format($datetime);
     }
 
-    protected function getArgDefinitions()
+    protected function getArgDefinitions(): ArgumentCollection
     {
         return new ArgumentCollection(
             Argument::createAnyTypeArgument("email"),

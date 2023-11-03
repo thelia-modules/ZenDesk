@@ -3,9 +3,16 @@
 namespace ZenDesk\Service;
 
 use DateTime;
+use Exception;
+use IntlDateFormatter;
 use Propel\Runtime\ActiveQuery\Criteria;
+use stdClass;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Translation\Translator;
+use Thelia\Model\Customer;
+use Thelia\Model\CustomerQuery;
+use Zendesk\API\Exceptions\AuthException;
+use Zendesk\API\Exceptions\ResponseException;
 use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
 
@@ -16,7 +23,7 @@ class ZendeskService
         protected SecurityContext $securityContext
     ) {}
 
-    public function sortOrder(
+    public function sortOrderTickets(
         array $order,
         array $columnDefinition,
         array $arrayTickets
@@ -87,11 +94,11 @@ class ZendeskService
         return $tickets;
     }
 
-    private function sortByNameColumn(array $tickets, array $columnDefinition, $sort): array
+    private function sortByNameColumn(array $items, array $columnDefinition, $sort): array
     {
         if ($sort === "ASC")
         {
-            usort($tickets, function ($a, $b) use ($columnDefinition) {
+            usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return strcmp($b->$index, $a->$index);
             });
@@ -99,20 +106,20 @@ class ZendeskService
 
         if ($sort === "DESC")
         {
-            usort($tickets, function ($a, $b) use ($columnDefinition) {
+            usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return strcmp($a->$index, $b->$index);
             });
         }
 
-        return $tickets;
+        return $items;
     }
 
-    private function sortById(array $tickets, array $columnDefinition, $sort): array
+    private function sortById(array $items, array $columnDefinition, $sort): array
     {
         if ($sort === "ASC")
         {
-            usort($tickets, function ($a, $b) use ($columnDefinition) {
+            usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return $b->$index <=> $a->$index;
             });
@@ -120,19 +127,38 @@ class ZendeskService
 
         if ($sort === "DESC")
         {
-            usort($tickets, function ($a, $b) use ($columnDefinition) {
+            usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return $a->$index <=> $b->$index;
             });
         }
 
-        return $tickets;
+        return $items;
+    }
+
+    public function sortOrderUsers(
+        array $order,
+        array $columnDefinition,
+        array $users
+    ): array
+    {
+        $sort = $order['dir'];
+
+        $sort = $sort === 'asc' ? Criteria::ASC : Criteria::DESC;
+
+        //order by ID
+        if (!(int)$order['column'])
+        {
+            return $this->sortById($users, $columnDefinition, $sort);
+        }
+
+        return $this->sortByNameColumn($users, $columnDefinition, $sort);
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    public function jsonFormat(\stdClass $ticket): array
+    public function jsonFormat(stdClass $ticket): array
     {
         $createdAt = new DateTime($ticket->created_at);
         $updateAt = new DateTime($ticket->updated_at);
@@ -196,6 +222,23 @@ class ZendeskService
             ];
     }
 
+    public function jsonUsersFormat(stdClass $users): array
+    {
+        return
+            [
+                [
+                    'href' => "/admin/customer/update?customer_id=" . $users->id,
+                    'name' => $users->ref,
+                ],
+                $users->name,
+                $users->email,
+                $users->role,
+                $users->created_at,
+                $users->updated_at,
+                $users->locale
+            ];
+    }
+
     public function formatTickets(array $tickets): array
     {
         $formatted_tickets = [];
@@ -234,11 +277,94 @@ class ZendeskService
 
     /**
      * @return bool true if retailer has tickets
+     * @throws AuthException
+     * @throws ResponseException
      */
     public function hasTickets(): bool
     {
         return 0 < $this->manager->getSumTicketsByUser(
                 $this->securityContext->getCustomerUser()->getEmail(),
             );
+    }
+
+    public function formatZendeskUsersByEmail(array $zendeskUsers, string $locale): array
+    {
+        $items = [];
+
+        foreach ($zendeskUsers as $users)
+        {
+            foreach ($users as $user)
+            {
+                if ($customer = $this->getCustomerByEmail($user->email))
+                {
+                    $items[] = $this->setUsersAsObject($user, $customer, $locale);
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    public function formatZendeskUsersForPagination(array $zendeskUsers, string $locale): array
+    {
+        $users = [];
+
+        foreach ($zendeskUsers as $user)
+        {
+            $customer = $this->getCustomerByEmail($user->email);
+
+            $users[] = $this->setUsersAsObject($user, $customer, $locale);
+        }
+
+        return $users;
+    }
+
+    public function setUsersAsObject(stdClass $user, ?Customer $customer, string $locale): stdClass
+    {
+        $obj = new stdClass();
+
+        if (null === $customer)
+        {
+            $obj->id= "#";
+            $obj->ref = "";
+        }
+
+        if (null !== $customer)
+        {
+            $obj->id = $customer->getId();
+            $obj->ref = $customer->getRef();
+        }
+
+        $obj->name = $user->name;
+        $obj->email = $user->email;
+        $obj->role = $user->role;
+        $obj->created_at = $this->getFormatDate(strtotime($user->created_at), $locale);
+        $obj->updated_at = $this->getFormatDate(strtotime($user->updated_at), $locale);
+        $obj->locale = $user->locale;
+
+        return $obj;
+    }
+
+    private function getCustomerByEmail(?string $email): ?Customer
+    {
+        if ($email === null)
+        {
+            return null;
+        }
+
+        return CustomerQuery::create()->findOneByEmail($email);
+    }
+
+    private function getFormatDate($datetime, string $locale): bool|string
+    {
+        $fmt = new IntlDateFormatter(
+            $locale,
+            IntlDateFormatter::NONE,
+            IntlDateFormatter::NONE
+        );
+
+        $fmt->setPattern('dd MMMM YYYY à H:mm');
+
+        return $fmt->format($datetime);
     }
 }

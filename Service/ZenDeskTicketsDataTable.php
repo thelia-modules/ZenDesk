@@ -3,6 +3,7 @@
 namespace ZenDesk\Service;
 
 use EasyDataTableManager\Service\DataTable\BaseDataTable;
+use Exception;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -32,7 +33,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function buildResponseData($type): Response
     {
@@ -45,7 +46,7 @@ class ZenDeskTicketsDataTable extends BaseDataTable
         $json = [];
 
         if ($tickets !== null) {
-            $sortedTickets = $this->service->sortOrder(
+            $sortedTickets = $this->service->sortOrderTickets(
                 $this->request->get('order')[0],
                 $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']],
                 $tickets

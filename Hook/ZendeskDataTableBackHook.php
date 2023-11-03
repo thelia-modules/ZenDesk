@@ -5,10 +5,10 @@ namespace ZenDesk\Hook;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
 
-class ZendeskDataTableFrontHook extends BaseHook
+class ZendeskDataTableBackHook extends BaseHook
 {
     public function renderDataTableTools(HookRenderEvent $event): void
     {
-        $event->add($this->render('datatable/render/zendesk.render.datatable.tickets.js.html'));
+        $event->add($this->render('datatable/render/zendesk.render.datatable.users.js.html'));
     }
 }

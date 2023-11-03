@@ -54,6 +54,28 @@ class ZenDeskManager
      * @throws ResponseException
      * @throws AuthException
      */
+    public function getAllUsersByPage(int $page = 1, int $nbUsers = 25): array
+    {
+        $client = $this->authZendeskAdmin();
+
+        return $client->users()->findAll(['per_page' => $nbUsers, 'page' => $page, 'sort_order' => "desc"])->users;
+    }
+
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
+    public function countAllUsers(): int
+    {
+        $client = $this->authZendeskAdmin();
+
+        return $client->users()->findAll()->count;
+    }
+
+    /**
+     * @throws ResponseException
+     * @throws AuthException
+     */
     public function getUserByEmail(string $mail, HttpClient $client = null): ?\stdClass
     {
         if ($client === null){

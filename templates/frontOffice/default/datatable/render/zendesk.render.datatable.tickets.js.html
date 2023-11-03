@@ -2,14 +2,6 @@
     (function () {
         MyTools = {
 
-            renderRefFunction: function (data) {
-                if (data !== '') {
-                    return '<u><a href="' + data['href'] + '" target="_blank">' + data['name'] + '</a></u>'
-                }
-
-                return '<a href="#" style="line-height:50px;text-align:center;width: 50px; height: 50px;">Aucune</a>';
-            },
-
             renderCommentsFunction: function (data) {
                 if (data !== '') {
 

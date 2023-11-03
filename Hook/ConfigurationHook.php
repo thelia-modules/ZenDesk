@@ -8,13 +8,9 @@ use ZenDesk\ZenDesk;
 
 class ConfigurationHook extends BaseHook
 {
-    public function onModuleConfiguration(HookRenderEvent $event)
+    public function onModuleConfiguration(HookRenderEvent $event): void
     {
-        $event->add($this->render("module_configuration.html", [
-            'url' => ZenDesk::getConfigValue('zen_desk_api_subdomain'),
-            'key' => ZenDesk::getConfigValue('zen_desk_api_username'),
-            'login' => ZenDesk::getConfigValue('zen_desk_api_token'),
-        ]));
+        $event->add($this->render("module_configuration.html"));
     }
 
     public static function getSubscribedHooks(): array
