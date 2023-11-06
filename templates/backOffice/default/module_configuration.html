@@ -15,6 +15,13 @@
     }
 </style>
 
+{block name="after-admin-css"}
+    {hook name="easydatatablemanager.css" location="easydatatablemanager-css" }
+{/block}
+
+{block name="after-bootstrap-css"} {/block}
+
+{block name="main-content"}
 <div class="row">
     <div class="col-md-12">
         <div class="general-block-decorator">
@@ -67,33 +74,7 @@
                                 {intl l="Zen Desk Users" d='zendesk.bo.default'}
                             </div>
 
-                            <table class="table table-condensed table-striped">
-                                <thead>
-                                <tr>
-                                    <th>{intl l='Id' d='zendesk.bo.default'}</th>
-                                    <th>{intl l='Name' d='zendesk.bo.default'}</th>
-                                    <th>{intl l='Email' d='zendesk.bo.default'}</th>
-                                    <th>{intl l='Role' d='zendesk.bo.default'}</th>
-                                    <th>{intl l='Locale' d='zendesk.bo.default'}</th>
-                                    <th>{intl l='Created_At' d='zendesk.bo.default'}</th>
-                                    <th>{intl l='Update_At' d='zendesk.bo.default'}</th>
-                                </tr>
-                                </thead>
-
-                                <tbody>
-                                {loop type="zendesk_users_loop" name="zendesk_user" locale=$locale}
-                                    <tr>
-                                        <td><a href={url path='/admin/customer/update?customer_id='}{$ID}>{$ID}</td>
-                                        <td>{$NAME}</td>
-                                        <td>{$EMAIL}</td>
-                                        <td>{$ROLE}</td>
-                                        <td>{$LOCALE}</td>
-                                        <td>{$CREATED_AT}</td>
-                                        <td>{$UPDATE_AT}</td>
-                                    </tr>
-                                {/loop}
-                                </tbody>
-                            </table>
+                            {datatable type="ZendeskUsersDataTable"}
                         </div>
 
                         <div id="parameters" class="tab-pane {if $tab eq "parameters"}active{/if} form-container">
@@ -134,3 +115,8 @@
         </div>
     </div>
 </div>
+{/block}
+
+{block name="javascript-initialization"}
+    {hook name="easydatatablemanager.js" location="easydatatablemanager-js" }
+{/block}

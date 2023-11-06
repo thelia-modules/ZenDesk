@@ -8,6 +8,9 @@
         <hook id="zendesk.database.render.front.tools.hook" class="ZenDesk\Hook\ZendeskDataTableFrontHook">
             <tag name="hook.event_listener" event="front.easydatatablemanager.js" type="front" method="renderDataTableTools" />
         </hook>
+        <hook id="zendesk.database.render.back.tools.hook" class="ZenDesk\Hook\ZendeskDataTableBackHook">
+            <tag name="hook.event_listener" event="easydatatablemanager.js" type="back" method="renderDataTableTools" />
+        </hook>
     </hooks>
 
     <loops>
