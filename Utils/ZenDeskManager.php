@@ -41,13 +41,29 @@ class ZenDeskManager
         $page = 1;
         $allUsers = [];
 
-        while ([] !== $users = $client->users()->findAll(['per_page' => 100, 'page' => $page, 'sort_order' => "desc"])->users)
-        {
+        while ([] !== $users = $client->users()->findAll(['per_page' => 100, 'page' => $page, 'sort_order' => "desc"])->users) {
             $allUsers[] = $users;
             $page += 1;
         }
 
         return $allUsers;
+    }
+
+    public function getAllUsersByApi(): array
+    {
+        $client = $this->authZendeskAdmin();
+
+        $pageCount = ceil($this->countAllUsers() / 100);
+
+        $users = [];
+        for ($page = 1; $page <= $pageCount; $page++) {
+            $users = array_merge(
+                $users,
+                $client->users()->findAll(['per_page' => 100, 'page' => $page, 'sort_order' => "desc"])->users
+            );
+        }
+
+        return $users;
     }
 
     /**
@@ -78,11 +94,11 @@ class ZenDeskManager
      */
     public function getUserByEmail(string $mail, HttpClient $client = null): ?\stdClass
     {
-        if ($client === null){
+        if ($client === null) {
             $client = $this->authZendeskAdmin();
         }
 
-        return  $client->users()->search(array("query" => $mail));
+        return $client->users()->search(array("query" => $mail));
     }
 
     /**
@@ -91,11 +107,11 @@ class ZenDeskManager
      */
     public function getUserById(int $id, HttpClient $client = null): ?\stdClass
     {
-        if ($client === null){
+        if ($client === null) {
             $client = $this->authZendeskAdmin();
         }
 
-        return  $client->users()->find($id);
+        return $client->users()->find($id);
     }
 
 
@@ -108,18 +124,15 @@ class ZenDeskManager
         $tickets = [];
         $option = ZenDesk::getConfigValue("zen_desk_ticket_type");
 
-        if ($option === "assigned")
-        {
+        if ($option === "assigned") {
             $tickets["assigned"] = $this->getTicketsAssignedByUser($user);
         }
 
-        if ($option === "requested")
-        {
+        if ($option === "requested") {
             $tickets["requested"] = $this->getTicketsRequestedByUser($user);
         }
 
-        if ($option === "all")
-        {
+        if ($option === "all") {
             $tickets["requested"] = $this->getTicketsRequestedByUser($user);
             $tickets["assigned"] = $this->getTicketsAssignedByUser($user);
         }
@@ -172,20 +185,17 @@ class ZenDeskManager
     {
         $option = ZenDesk::getConfigValue("zen_desk_ticket_type");
 
-        if ($option === "assigned")
-        {
+        if ($option === "assigned") {
             return $this->getSumTicketsAssignedByUser($user);
         }
 
-        if ($option === "requested")
-        {
+        if ($option === "requested") {
             return $this->getSumTicketsRequestedByUser($user);
         }
 
         return
             $this->getSumTicketsRequestedByUser($user) +
-            $this->getSumTicketsAssignedByUser($user)
-            ;
+            $this->getSumTicketsAssignedByUser($user);
     }
 
     /**
@@ -204,7 +214,7 @@ class ZenDeskManager
             return $client->users($customerId)->tickets()->requested()->count;
         }
 
-        return  0;
+        return 0;
     }
 
     /**
@@ -223,7 +233,7 @@ class ZenDeskManager
             return $client->users($customerId)->tickets()->assigned()->count;
         }
 
-        return  0;
+        return 0;
     }
 
 
@@ -333,12 +343,12 @@ class ZenDeskManager
      * @throws ApiResponseException
      * @throws AuthException
      */
-    public function getOrganizationId(string $organization) :?int
+    public function getOrganizationId(string $organization): ?int
     {
         $organizations = $this->getAllOrganization();
 
-        foreach ($organizations as $oneOrganization){
-            if ($oneOrganization->name === $organization){
+        foreach ($organizations as $oneOrganization) {
+            if ($oneOrganization->name === $organization) {
                 return $oneOrganization->id;
             }
         }

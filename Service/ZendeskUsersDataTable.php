@@ -5,6 +5,7 @@ namespace ZenDesk\Service;
 use EasyDataTableManager\Service\DataTable\BaseDataTable;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use SmartyException;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,16 +23,18 @@ class ZendeskUsersDataTable extends BaseDataTable
     protected $request;
 
     public function __construct(
-        protected ZenDeskManager    $manager,
-        protected SecurityContext   $securityContext,
-        protected ZendeskService    $service,
-        RequestStack                $requestStack,
-        EventDispatcherInterface    $dispatcher,
-        ParserInterface             $parser,
+        protected ZenDeskManager          $manager,
+        protected SecurityContext         $securityContext,
+        protected ZendeskService          $service,
+        RequestStack                      $requestStack,
+        EventDispatcherInterface          $dispatcher,
+        ParserInterface                   $parser,
+        private readonly AdapterInterface $theliaCache
     )
     {
         parent::__construct($requestStack, $dispatcher, $parser);
         $this->request = $requestStack->getCurrentRequest();
+
     }
 
     /**
@@ -42,27 +45,17 @@ class ZendeskUsersDataTable extends BaseDataTable
     {
         $locale = $this->request->getSession()->get('thelia.current.lang')->getLocale();
 
-        //no pagination
-        /*
-        $zendeskUsers = $this->manager->getAllUsers();
-        $users = $this->service->formatZendeskUsersByEmail($zendeskUsers, $locale);
-        $countUsers = count($users);
-        */
-        //----
+        $cacheItem = $this->theliaCache->getItem('zendesk_users_' . $locale);
 
-        //pagination
+        if (!$cacheItem->isHit()) {
+            $cacheItem->set($this->manager->getAllUsersByApi());
+            $cacheItem->expiresAfter(86400);
 
-        $nbUsersPerPages = 25;
-        $start = $this->request->request->get("start");
-        $page = $start / $nbUsersPerPages;
+            $this->theliaCache->save($cacheItem);
+        }
 
-        $zendeskUsers = $this->manager->getAllUsersByPage($page, $nbUsersPerPages);
-
-        $users = $this->service->formatZendeskUsersForPagination($zendeskUsers, $locale);
-
-        $countUsers = $this->manager->countAllUsers();
-        
-        //----
+        $users = $this->service->filterByCustomer($cacheItem->get(), $locale);
+        $usersCount = count($users);
 
         $json = [];
 
@@ -76,14 +69,13 @@ class ZendeskUsersDataTable extends BaseDataTable
 
             $json = [
                 "draw" => (int)$this->request->get('draw'),
-                "recordsTotal" => $countUsers,
-                "recordsFiltered" => $countUsers,
+                "recordsTotal" => $usersCount,
+                "recordsFiltered" => $usersCount,
                 "data" => [],
-                "users" => $countUsers
+                "users" => $usersCount
             ];
 
-            foreach ($sortedUsers as $user)
-            {
+            foreach ($sortedUsers as $user) {
                 $json['data'][] = $this->service->jsonUsersFormat($user);
             }
         }
@@ -106,7 +98,7 @@ class ZendeskUsersDataTable extends BaseDataTable
      */
     public function getFiltersTemplate($params = []): string
     {
-        return $this->parser->render('datatable/render/zendesk.render.datatable.users.js.html', []);
+        return '';
     }
 
     /**

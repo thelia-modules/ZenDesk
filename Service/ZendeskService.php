@@ -11,6 +11,7 @@ use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\Customer;
 use Thelia\Model\CustomerQuery;
+use Thelia\Tools\URL;
 use Zendesk\API\Exceptions\AuthException;
 use Zendesk\API\Exceptions\ResponseException;
 use ZenDesk\Utils\ZenDeskManager;
@@ -224,10 +225,11 @@ class ZendeskService
 
     public function jsonUsersFormat(stdClass $users): array
     {
+        $url = URL::getInstance()->absoluteUrl("/admin/customer/update?customer_id=" . $users->id);
         return
             [
                 [
-                    'href' => "/admin/customer/update?customer_id=" . $users->id,
+                    'href' => $url,
                     'name' => $users->ref,
                 ],
                 $users->name,
@@ -305,13 +307,14 @@ class ZendeskService
         return $items;
     }
 
-    public function formatZendeskUsersForPagination(array $zendeskUsers, string $locale): array
+    public function filterByCustomer(array $zendeskUsers, string $locale): array
     {
         $users = [];
 
-        foreach ($zendeskUsers as $user)
-        {
-            $customer = $this->getCustomerByEmail($user->email);
+        foreach ($zendeskUsers as $user) {
+            if (!$customer = $this->getCustomerByEmail($user->email)) {
+                continue;
+            }
 
             $users[] = $this->setUsersAsObject($user, $customer, $locale);
         }
