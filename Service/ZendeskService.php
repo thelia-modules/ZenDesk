@@ -20,9 +20,11 @@ use ZenDesk\ZenDesk;
 class ZendeskService
 {
     public function __construct(
-        protected ZenDeskManager $manager,
+        protected ZenDeskManager  $manager,
         protected SecurityContext $securityContext
-    ) {}
+    )
+    {
+    }
 
     public function sortOrderTickets(
         array $order,
@@ -40,28 +42,22 @@ class ZendeskService
         $sort = $order['dir'];
 
         // order by UpdatedDate and status
-        if (!(int)$order['column'] && $sort == "")
-        {
-            foreach ($tickets as $ticket)
-            {
-                if ($ticket->status === "new")
-                {
+        if (!(int)$order['column'] && $sort == "") {
+            foreach ($tickets as $ticket) {
+                if ($ticket->status === "new") {
                     $ticketsNew[] = $ticket;
                 }
 
-                if ($ticket->status === "open")
-                {
+                if ($ticket->status === "open") {
                     $ticketsOpen[] = $ticket;
                 }
 
-                if ($ticket->status === "pending")
-                {
+                if ($ticket->status === "pending") {
                     $ticketsPending[] = $ticket;
                 }
 
                 if ($ticket->status === "closed" ||
-                    $ticket->status === "solved")
-                {
+                    $ticket->status === "solved") {
                     $ticketsClosed[] = $ticket;
                 }
             }
@@ -77,8 +73,7 @@ class ZendeskService
         $sort = $sort === 'asc' ? Criteria::ASC : Criteria::DESC;
 
         //order by ID
-        if (!(int)$order['column'])
-        {
+        if (!(int)$order['column']) {
             return $this->sortById($tickets, $columnDefinition, $sort);
         }
 
@@ -87,8 +82,7 @@ class ZendeskService
 
     private function sortByUpdatedAt(array $tickets, array $columnDefinition): array
     {
-        usort($tickets, function($a, $b) use ($columnDefinition)
-        {
+        usort($tickets, function ($a, $b) use ($columnDefinition) {
             return strcmp($b->updated_at, $a->updated_at);
         });
 
@@ -97,16 +91,14 @@ class ZendeskService
 
     private function sortByNameColumn(array $items, array $columnDefinition, $sort): array
     {
-        if ($sort === "ASC")
-        {
+        if ($sort === "ASC") {
             usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return strcmp($b->$index, $a->$index);
             });
         }
 
-        if ($sort === "DESC")
-        {
+        if ($sort === "DESC") {
             usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return strcmp($a->$index, $b->$index);
@@ -118,16 +110,14 @@ class ZendeskService
 
     private function sortById(array $items, array $columnDefinition, $sort): array
     {
-        if ($sort === "ASC")
-        {
+        if ($sort === "ASC") {
             usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return $b->$index <=> $a->$index;
             });
         }
 
-        if ($sort === "DESC")
-        {
+        if ($sort === "DESC") {
             usort($items, function ($a, $b) use ($columnDefinition) {
                 $index = $columnDefinition["name"];
                 return $a->$index <=> $b->$index;
@@ -148,8 +138,7 @@ class ZendeskService
         $sort = $sort === 'asc' ? Criteria::ASC : Criteria::DESC;
 
         //order by ID
-        if (!(int)$order['column'])
-        {
+        if (!(int)$order['column']) {
             return $this->sortById($users, $columnDefinition, $sort);
         }
 
@@ -167,8 +156,7 @@ class ZendeskService
         $ticketType = ZenDesk::getConfigValue("zen_desk_ticket_type");
         $hiddenColumn = ZenDesk::getConfigValue("zen_desk_hide_column");
 
-        if ($ticketType === "requested" || $ticketType === "all" && $hiddenColumn === "requested hide")
-        {
+        if ($ticketType === "requested" || $ticketType === "all" && $hiddenColumn === "requested hide") {
             return
                 [
                     $ticket->id,
@@ -186,8 +174,7 @@ class ZendeskService
                 ];
         }
 
-        if ($ticketType === "assigned" || $ticketType === "all" && $hiddenColumn === "assigned hide")
-        {
+        if ($ticketType === "assigned" || $ticketType === "all" && $hiddenColumn === "assigned hide") {
             return
                 [
                     $ticket->id,
@@ -245,10 +232,8 @@ class ZendeskService
     {
         $formatted_tickets = [];
 
-        foreach ($tickets as $ticketType)
-        {
-            foreach ($ticketType as $ticket)
-            {
+        foreach ($tickets as $ticketType) {
+            foreach ($ticketType as $ticket) {
                 $formatted_tickets[] = $ticket;
             }
         }
@@ -258,19 +243,19 @@ class ZendeskService
 
     public function translateStatus(string $status): ?string
     {
-        if ($status === "new"){
+        if ($status === "new") {
             return Translator::getInstance()->trans('new', [], ZenDesk::DOMAIN_NAME);
         }
-        if ($status === "open"){
+        if ($status === "open") {
             return Translator::getInstance()->trans('open', [], ZenDesk::DOMAIN_NAME);
         }
-        if ($status === "pending"){
+        if ($status === "pending") {
             return Translator::getInstance()->trans('pending', [], ZenDesk::DOMAIN_NAME);
         }
-        if ($status === "solved"){
+        if ($status === "solved") {
             return Translator::getInstance()->trans('solved', [], ZenDesk::DOMAIN_NAME);
         }
-        if ($status === "closed"){
+        if ($status === "closed") {
             return Translator::getInstance()->trans('closed', [], ZenDesk::DOMAIN_NAME);
         }
 
@@ -284,21 +269,22 @@ class ZendeskService
      */
     public function hasTickets(): bool
     {
-        return 0 < $this->manager->getSumTicketsByUser(
-                $this->securityContext->getCustomerUser()->getEmail(),
-            );
+        try {
+            return 0 < $this->manager->getSumTicketsByUser(
+                    $this->securityContext->getCustomerUser()->getEmail(),
+                );
+        } catch (Exception) {
+            return false;
+        }
     }
 
     public function formatZendeskUsersByEmail(array $zendeskUsers, string $locale): array
     {
         $items = [];
 
-        foreach ($zendeskUsers as $users)
-        {
-            foreach ($users as $user)
-            {
-                if ($customer = $this->getCustomerByEmail($user->email))
-                {
+        foreach ($zendeskUsers as $users) {
+            foreach ($users as $user) {
+                if ($customer = $this->getCustomerByEmail($user->email)) {
                     $items[] = $this->setUsersAsObject($user, $customer, $locale);
                 }
             }
@@ -326,14 +312,12 @@ class ZendeskService
     {
         $obj = new stdClass();
 
-        if (null === $customer)
-        {
-            $obj->id= "#";
+        if (null === $customer) {
+            $obj->id = "#";
             $obj->ref = "";
         }
 
-        if (null !== $customer)
-        {
+        if (null !== $customer) {
             $obj->id = $customer->getId();
             $obj->ref = $customer->getRef();
         }
@@ -350,8 +334,7 @@ class ZendeskService
 
     private function getCustomerByEmail(?string $email): ?Customer
     {
-        if ($email === null)
-        {
+        if ($email === null) {
             return null;
         }
 
