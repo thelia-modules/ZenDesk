@@ -12,6 +12,7 @@ use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\Security\SecurityContext;
 use Thelia\Core\Template\ParserInterface;
 use Thelia\Core\Translation\Translator;
+use Thelia\Log\Tlog;
 use ZenDesk\Utils\ZenDeskManager;
 use ZenDesk\ZenDesk;
 
@@ -20,12 +21,12 @@ class ZenDeskTicketsDataTable extends BaseDataTable
     protected $request;
 
     public function __construct(
-        protected ZenDeskManager    $manager,
-        protected SecurityContext   $securityContext,
-        protected ZendeskService    $service,
-        RequestStack                $requestStack,
-        EventDispatcherInterface    $dispatcher,
-        ParserInterface             $parser,
+        protected ZenDeskManager  $manager,
+        protected SecurityContext $securityContext,
+        protected ZendeskService  $service,
+        RequestStack              $requestStack,
+        EventDispatcherInterface  $dispatcher,
+        ParserInterface           $parser,
     )
     {
         parent::__construct($requestStack, $dispatcher, $parser);
@@ -37,32 +38,43 @@ class ZenDeskTicketsDataTable extends BaseDataTable
      */
     public function buildResponseData($type): Response
     {
-        $tickets = $this->manager->getTicketsByUser($this->securityContext->getCustomerUser()->getEmail());
+        try {
+            $tickets = $this->manager->getTicketsByUser($this->securityContext->getCustomerUser()->getEmail());
 
-        $sumTickets = $this->manager->getSumTicketsByUser(
-            $this->securityContext->getCustomerUser()->getEmail()
-        );
-
-        $json = [];
-
-        if ($tickets !== null) {
-            $sortedTickets = $this->service->sortOrderTickets(
-                $this->request->get('order')[0],
-                $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']],
-                $tickets
+            $sumTickets = $this->manager->getSumTicketsByUser(
+                $this->securityContext->getCustomerUser()->getEmail()
             );
 
+            $json = [];
+
+            if ($tickets !== null) {
+                $sortedTickets = $this->service->sortOrderTickets(
+                    $this->request->get('order')[0],
+                    $this->getDefineColumnsDefinition(true)[(int)$this->request->get('order')[0]['column']],
+                    $tickets
+                );
+
+                $json = [
+                    "draw" => (int)$this->request->get('draw'),
+                    "recordsTotal" => $sumTickets,
+                    "recordsFiltered" => $sumTickets,
+                    "data" => [],
+                    "tickets" => count($tickets)
+                ];
+                foreach ($sortedTickets as $ticket) {
+                    $json['data'][] = $this->service->jsonFormat($ticket);
+                }
+            }
+
+        } catch (Exception $ex) {
+            Tlog::getInstance()->addError('Zenddesk datatable error : ' . $ex->getMessage());
             $json = [
                 "draw" => (int)$this->request->get('draw'),
-                "recordsTotal" => $sumTickets,
-                "recordsFiltered" => $sumTickets,
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
                 "data" => [],
-                "tickets" => count($tickets)
+                "tickets" => 0
             ];
-            foreach ($sortedTickets as $ticket)
-            {
-                $json['data'][] = $this->service->jsonFormat($ticket);
-            }
         }
 
         return new JsonResponse($json);
@@ -109,28 +121,24 @@ class ZenDeskTicketsDataTable extends BaseDataTable
                 'title' => Translator::getInstance()->trans('Subject', [], ZenDesk::DOMAIN_NAME)
             ];
 
-        if ($ticketType === "assigned" || $ticketType === "all" && $hiddenColumn !== "requested hide")
-        {
+        if ($ticketType === "assigned" || $ticketType === "all" && $hiddenColumn !== "requested hide") {
             $definitions[] =
                 [
                     'name' => 'requester_id',
                     'targets' => ++$i,
                     'className' => "text-center",
                     'title' => Translator::getInstance()->trans('Requester', [], ZenDesk::DOMAIN_NAME),
-                ]
-            ;
+                ];
         }
 
-        if ($ticketType === "requested" || $ticketType === "all" && $hiddenColumn !== "assigned hide")
-        {
+        if ($ticketType === "requested" || $ticketType === "all" && $hiddenColumn !== "assigned hide") {
             $definitions[] =
                 [
                     'name' => 'assignee_id',
                     'targets' => ++$i,
                     'className' => "text-center",
                     'title' => Translator::getInstance()->trans('Assignee', [], ZenDesk::DOMAIN_NAME)
-                ]
-            ;
+                ];
         }
 
         $definitions[] =
