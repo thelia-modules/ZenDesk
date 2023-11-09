@@ -111,7 +111,12 @@ class FrontController extends BaseFrontController
 
         $formattedComment = [];
 
-        foreach ($comments["comments"] as $keyComment => $comment){
+        foreach ($comments["comments"] as $keyComment => $comment) {
+            //if comment is private and show private false
+            if (!$comment->public && !ZenDesk::getConfigValue("zen_desk_show_private_comment")) {
+                continue;
+            }
+
             $author = $manager->getCommentAuthor($comment->author_id)["user"];
 
             $formattedComment[$keyComment]["author_name"] = $author->name;

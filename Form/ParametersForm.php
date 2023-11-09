@@ -2,6 +2,7 @@
 
 namespace ZenDesk\Form;
 
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
@@ -74,6 +75,15 @@ class ParametersForm extends BaseForm
                         )
                     ],
                     'data' => ZenDesk::getConfigValue('zen_desk_hide_column')
+                ]
+            )
+            ->add(
+                'private_comment',
+                CheckboxType::class,
+                [
+                    'label'    => Translator::getInstance()->trans("Show private comments ?", [], ZenDesk::DOMAIN_NAME),
+                    'required' => false,
+                    'data' => (bool)ZenDesk::getConfigValue('zen_desk_show_private_comment')
                 ]
             )
         ;

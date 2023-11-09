@@ -31,6 +31,7 @@ class ZenDesk extends BaseModule
         self::setConfigValue('zen_desk_user_rules', 'false');
         self::setConfigValue('zen_desk_ticket_type', 'assigned');
         self::setConfigValue('zen_desk_hide_column', 'nothing hide');
+        self::setConfigValue('zen_desk_show_private_comment', 'false');
     }
 
     /**
