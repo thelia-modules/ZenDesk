@@ -54,6 +54,7 @@ class ConfigurationController extends AdminController
             ZenDesk::setConfigValue("zen_desk_ticket_type", $data["ticket_type"]);
             ZenDesk::setConfigValue("zen_desk_hide_column", $data["column_hide"]);
             ZenDesk::setConfigValue("zen_desk_show_private_comment", $data["private_comment"]);
+            ZenDesk::setConfigValue("zen_desk_status_hold", $data["status_hold"]);
 
             return $this->generateSuccessRedirect($form);
         } catch (FormValidationException $e) {

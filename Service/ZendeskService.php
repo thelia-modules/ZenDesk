@@ -37,6 +37,7 @@ class ZendeskService
         $ticketsNew = [];
         $ticketsOpen = [];
         $ticketsPending = [];
+        $ticketsHold = [];
         $ticketsClosed = [];
 
         $sort = $order['dir'];
@@ -56,6 +57,10 @@ class ZendeskService
                     $ticketsPending[] = $ticket;
                 }
 
+                if ($ticket->status === "hold") {
+                    $ticketsHold[] = $ticket;
+                }
+
                 if ($ticket->status === "closed" ||
                     $ticket->status === "solved") {
                     $ticketsClosed[] = $ticket;
@@ -66,6 +71,7 @@ class ZendeskService
                 $this->sortByUpdatedAt($ticketsNew, $columnDefinition),
                 $this->sortByUpdatedAt($ticketsOpen, $columnDefinition),
                 $this->sortByUpdatedAt($ticketsPending, $columnDefinition),
+                $this->sortByUpdatedAt($ticketsHold, $columnDefinition),
                 $this->sortByUpdatedAt($ticketsClosed, $columnDefinition)
             );
         }
@@ -156,7 +162,7 @@ class ZendeskService
         $ticketType = ZenDesk::getConfigValue("zen_desk_ticket_type");
         $hiddenColumn = ZenDesk::getConfigValue("zen_desk_hide_column");
 
-        if ($ticketType === "requested" || $ticketType === "all" && $hiddenColumn === "requested hide") {
+        if ($ticketType === "requested" || ($ticketType === "all" && $hiddenColumn === "requested hide")) {
             return
                 [
                     $ticket->id,
@@ -174,7 +180,7 @@ class ZendeskService
                 ];
         }
 
-        if ($ticketType === "assigned" || $ticketType === "all" && $hiddenColumn === "assigned hide") {
+        if ($ticketType === "assigned" || ($ticketType === "all" && $hiddenColumn === "assigned hide")) {
             return
                 [
                     $ticket->id,
@@ -251,6 +257,9 @@ class ZendeskService
         }
         if ($status === "pending") {
             return Translator::getInstance()->trans('pending', [], ZenDesk::DOMAIN_NAME);
+        }
+        if ($status === "hold") {
+            return Translator::getInstance()->trans('hold', [], ZenDesk::DOMAIN_NAME);
         }
         if ($status === "solved") {
             return Translator::getInstance()->trans('solved', [], ZenDesk::DOMAIN_NAME);
