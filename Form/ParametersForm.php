@@ -86,6 +86,15 @@ class ParametersForm extends BaseForm
                     'data' => (bool)ZenDesk::getConfigValue('zen_desk_show_private_comment')
                 ]
             )
+            ->add(
+                'status_hold',
+                CheckboxType::class,
+                [
+                    'label'    => Translator::getInstance()->trans("Status \"On-hold\" Activated ?", [], ZenDesk::DOMAIN_NAME),
+                    'required' => false,
+                    'data' => (bool)ZenDesk::getConfigValue('zen_desk_status_hold')
+                ]
+            )
         ;
     }
 }

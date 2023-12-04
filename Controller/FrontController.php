@@ -140,7 +140,8 @@ class FrontController extends BaseFrontController
             "ticketId" => $id,
             "ticketName" => $ticketName,
             "status" => $ticket["ticket"]->status,
-            "zendesk_rules" => (bool)ZenDesk::getConfigValue("zen_desk_user_rules")
+            "zendesk_rules" => (bool)ZenDesk::getConfigValue("zen_desk_user_rules"),
+            "zendesk_hold" => (bool)ZenDesk::getConfigValue("zen_desk_status_hold"),
          ]);
     }
 
@@ -200,6 +201,7 @@ class FrontController extends BaseFrontController
                 if (
                     $status ==="open" ||
                     $status === "pending" ||
+                    $status === "hold" ||
                     $status ==="solved"
                 ) {
                     $params = [
