@@ -32,7 +32,7 @@
                         {/if}
                     </div>
                     <div class="comment-info">
-                        <strong class="text-main comment-author-name">{$comment.author_name}</strong>
+                        <strong class="text-main comment-author-name">{$comment.author_name|truncate:25:"...":true}</strong>
                         - {$comment.created_at_str}
                         <span> - {$comment.created_at}</span>
                     </div>
